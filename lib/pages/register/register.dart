@@ -1,6 +1,6 @@
-import 'dart:io'; // Untuk File
+import 'dart:io'; // For File
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // Untuk mengambil gambar dari kamera
+import 'package:image_picker/image_picker.dart'; // For image picking
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -11,9 +11,9 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   bool _isObscure = true;
-  File? _imageFile; // File gambar yang diambil dari kamera
+  File? _imageFile; // File for the image taken from the camera
 
-  // Function untuk mengambil gambar dari kamera
+  // Function to pick an image from the camera
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
@@ -66,7 +66,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 30),
 
-                // Input Nama Lengkap
+                // Input fields
                 TextField(
                   decoration: InputDecoration(
                     labelText: 'Nomor Pegawai',
@@ -135,7 +135,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Input
+                // Input Address
                 TextField(
                   decoration: InputDecoration(
                     labelText: 'Alamat',
@@ -182,7 +182,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Input Gambar dari Kamera
+                // Upload Employee Photo
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -196,7 +196,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Preview gambar yang diambil dari kamera
+                        // Image preview
                         _imageFile == null
                             ? const Text('Tidak ada gambar yang dipilih.')
                             : ClipOval(
@@ -207,7 +207,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                        // Tombol untuk mengambil gambar dari kamera
+                        // Button to take a picture
                         GestureDetector(
                           onTap: _pickImage,
                           child: Container(
@@ -216,7 +216,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             decoration: BoxDecoration(
                               color: Colors.blue,
                               borderRadius:
-                                  BorderRadius.circular(10), // Set radius to 10
+                                  BorderRadius.circular(10), // Radius set to 10
                             ),
                             child: const Icon(
                               Icons.camera_alt,
@@ -231,12 +231,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   ],
                 ),
 
-                // Tombol Daftar
+                // Register Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Tambahkan fungsi register di sini
+                      // Add register functionality here
                     },
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 15),
@@ -253,14 +253,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Sudah punya akun
+                // Already have an account
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text("Sudah punya akun?"),
                     TextButton(
                       onPressed: () {
-                        Navigator.pop(context); // Kembali ke halaman login
+                        Navigator.pop(context); // Go back to login page
                       },
                       child: const Text(
                         "Login Disini",

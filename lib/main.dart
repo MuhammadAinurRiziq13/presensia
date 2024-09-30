@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'login.dart'; // Import login.dart
-import 'splash_screen.dart'; // Import splash_screen.dart
+import 'pages/login/login.dart'; // Import login.dart
+import 'pages/splash_screen/splash_screen.dart'; // Import splash_screen.dart
 
 void main() {
   runApp(const MyApp());
 }
 
-// test
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
