@@ -26,7 +26,7 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Colors.grey[200], // Light background color for contrast
+        color: Colors.grey[200], 
         child: _pages[_currentIndex],
       ),
       floatingActionButton: Container(
