@@ -17,7 +17,7 @@ class _AppState extends State<App> {
   final List<Widget> _pages = [
     HomePage(),
     HistoryPage(),
-    PresensiWidget(), // Placeholder for the Camera
+    PresensiWidget(), 
     PermitPage(),
     ProfilePage(),
   ];
