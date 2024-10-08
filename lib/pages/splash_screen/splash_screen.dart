@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:async'; // Import untuk Future.delayed
-import 'login.dart'; // Import login.dart untuk navigasi ke halaman login
+import 'dart:async';
+import '../login/login.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,13 +13,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Delay 1 detik sebelum berpindah ke LoginPage
     Timer(const Duration(seconds: 1), () {
       Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
+          context, MaterialPageRoute(builder: (context) => const LoginPage()));
     });
   }
 
@@ -28,8 +24,8 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       body: Center(
         child: Image.asset(
-          'images/logo.png', // Path gambar logo
-          width: 150.0, // Sesuaikan ukuran logo
+          'images/logo.png',
+          width: 150.0,
           height: 150.0,
         ),
       ),
