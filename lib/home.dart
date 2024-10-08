@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'history.dart';
 
 class Home extends StatefulWidget {
+  const Home({super.key});
+
   @override
   _HomeState createState() => _HomeState();
 }
@@ -9,11 +12,11 @@ class _HomeState extends State<Home> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    HomePage(),
-    HistoryPage(),
-    PlaceholderWidget(), // Placeholder for the Camera
-    PermitPage(),
-    ProfilePage(),
+    const HomePage(),
+    const HistoryPage(),
+    const PlaceholderWidget(), // Placeholder for the Camera
+    const PermitPage(),
+    const ProfilePage(),
   ];
 
   @override
@@ -46,8 +49,9 @@ class _HomeState extends State<Home> {
           });
         },
         backgroundColor: Colors.blue,
-        child: Icon(Icons.camera_alt, color: Colors.white),
-        shape: CircleBorder(), // Make the button circular
+        shape: const CircleBorder(),
+        child: const Icon(Icons.camera_alt,
+            color: Colors.white), // Make the button circular
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomNavigationBar(
@@ -92,36 +96,44 @@ class _HomeState extends State<Home> {
 
 // Placeholder for each page in the navigation
 class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('Home Page'));
+    return const Center(child: Text('Home Page'));
   }
 }
 
-class HistoryPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text('History Page'));
-  }
-}
+// class HistoryPage extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Center(child: Text('History Page'));
+//   }
+// }
 
 class PermitPage extends StatelessWidget {
+  const PermitPage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('Permit Page'));
+    return const Center(child: Text('Permit Page'));
   }
 }
 
 class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('Profile Page'));
+    return const Center(child: Text('Profile Page'));
   }
 }
 
 class PlaceholderWidget extends StatelessWidget {
+  const PlaceholderWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('Camera Placeholder'));
+    return const Center(child: Text('Camera Placeholder'));
   }
 }

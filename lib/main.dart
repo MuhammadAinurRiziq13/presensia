@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login.dart'; // Import login.dart
+// Import login.dart
 import 'splash_screen.dart'; // Import splash_screen.dart
 
 void main() {

@@ -127,7 +127,8 @@ class _LoginPageState extends State<LoginPage> {
                           // Navigasi ke halaman Home
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => Home()),
+                            MaterialPageRoute(
+                                builder: (context) => const Home()),
                           );
                         },
                         style: ElevatedButton.styleFrom(
