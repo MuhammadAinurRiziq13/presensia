@@ -14,27 +14,24 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        color: const Color.fromARGB(255, 243, 243, 243),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                _buildProfileSection(),
-                const SizedBox(height: 20),
-                _buildDateAndLocation(),
-                const SizedBox(height: 20),
-                _buildDailyPresenceSection(),
-                const SizedBox(height: 20),
-                _buildMonthlyPresenceSection(),
-                const SizedBox(height: 20),
-                if (_showSlideButton) _buildSliderButton(context),
-                const SizedBox(height: 20),
-              ],
-            ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              _buildProfileSection(),
+              const SizedBox(height: 20),
+              _buildDateAndLocation(),
+              const SizedBox(height: 20),
+              _buildDailyPresenceSection(),
+              const SizedBox(height: 20),
+              _buildMonthlyPresenceSection(),
+              const SizedBox(height: 20),
+              if (_showSlideButton) _buildSliderButton(context),
+              const SizedBox(height: 20),
+            ],
           ),
         ),
       ),
