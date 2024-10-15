@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:presensia/pages/splash_screen/splash_screen.dart';
+import 'profile_detail_page.dart';
+import 'help_page.dart';
+import 'privacy_policy_page.dart';
+import 'terms_and_conditions_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -9,7 +14,7 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: const Text(
-          'Profil',
+          'Profile',
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
@@ -21,12 +26,37 @@ class ProfilePage extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
             Center(
-              child: CircleAvatar(
-                radius: 60,
-                backgroundImage: NetworkImage(
-                    'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg'),
+              child: Stack(
+                children: [ 
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundImage: NetworkImage(
+                      'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg'),
+                 ),
+                Positioned(
+                bottom: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: () {
+                    // Logika untuk mengedit foto profil
+                },
+                child: Container(
+                  width: 40, // Lebar tombol
+                  height: 40, // Tinggi tombol
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue, // Warna latar belakang
+                  ),
+                  child: const Icon(
+                    Icons.edit,
+                    color: Colors.white, // Warna ikon
+                  ),
               ),
             ),
+                ),
+          ],
+        ),
+      ),
             const SizedBox(height: 20),
             const Text(
               'Anomalia',
@@ -59,7 +89,11 @@ class ProfilePage extends StatelessWidget {
                     icon: Icons.person,
                     text: 'Profil Saya',
                     onTap: () {
-                      // Aksi saat menu "Profil Saya" ditekan
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ProfileDetailPage()),
+                      );
                     },
                   ),
                   const Divider(),
@@ -68,7 +102,11 @@ class ProfilePage extends StatelessWidget {
                     icon: Icons.help_outline,
                     text: 'Bantuan',
                     onTap: () {
-                      // Aksi saat menu "Bantuan" ditekan
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => HelpPage()),
+                      );
                     },
                   ),
                   const Divider(),
@@ -77,7 +115,11 @@ class ProfilePage extends StatelessWidget {
                     icon: Icons.privacy_tip_outlined,
                     text: 'Kebijakan Privasi',
                     onTap: () {
-                      // Aksi saat menu "Kebijakan Privasi" ditekan
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PrivacyPolicyPage()),
+                      );
                     },
                   ),
                   const Divider(),
@@ -86,17 +128,19 @@ class ProfilePage extends StatelessWidget {
                     icon: Icons.description_outlined,
                     text: 'Syarat & Ketentuan',
                     onTap: () {
-                      // Aksi saat menu "Syarat & Ketentuan" ditekan
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => TermsAndConditionsPage()),
+                      );
                     },
                   ),
                   const Divider(),
-                  // Menu Keluar dengan warna merah
                   _buildLogoutMenuItem(
                     context,
                     icon: Icons.logout,
                     text: 'Keluar',
                     onTap: () {
-                      // Aksi saat menu "Keluar" ditekan
                       _showLogoutDialog(context);
                     },
                   ),
@@ -110,17 +154,22 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildMenuItem(BuildContext context,
-      {required IconData icon, required String text, required Function() onTap}) {
+      {required IconData icon,
+      required String text,
+      required Function() onTap}) {
     return ListTile(
       leading: Icon(icon, color: Colors.blue),
       title: Text(text),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      trailing:
+          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
       onTap: onTap,
     );
   }
 
   Widget _buildLogoutMenuItem(BuildContext context,
-      {required IconData icon, required String text, required Function() onTap}) {
+      {required IconData icon,
+      required String text,
+      required Function() onTap}) {
     return ListTile(
       leading: Icon(icon, color: Colors.red),
       title: Text(
@@ -132,29 +181,34 @@ class ProfilePage extends StatelessWidget {
   }
 
   void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Konfirmasi Keluar'),
-          content: const Text('Apakah Anda yakin ingin keluar?'),
-          actions: [
-            TextButton(
-              child: const Text('Batal'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Keluar', style: TextStyle(color: Colors.red)),
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Logika keluar di sini
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Konfirmasi Keluar'),
+        content: const Text('Apakah Anda yakin ingin keluar?'),
+        actions: [
+          TextButton(
+            child: const Text('Batal'),
+            onPressed: () {
+              Navigator.of(context).pop(); 
+            },
+          ),
+          TextButton(
+            child: const Text('Keluar', style: TextStyle(color: Colors.red)),
+            onPressed: () {
+              Navigator.of(context).pop(); 
+
+              // Back to login page
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const SplashScreen()),
+                (Route<dynamic> route) => false,
+              );
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 }
