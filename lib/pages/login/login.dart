@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io'; // Import for File handling
 import '../app.dart'; // Import halaman Home
 import '../register/register.dart'; // Import halaman register
 import '../../widgets/custom_button.dart'; // Import widget kustom
@@ -12,6 +14,19 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _isObscure = true;
+  final ImagePicker _picker = ImagePicker();
+  File? _image;
+
+  Future<void> _getImageFromCamera() async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path); // Menyimpan gambar dari kamera
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +70,10 @@ class _LoginPageState extends State<LoginPage> {
                 _buildLoginButtons(),
                 const SizedBox(height: 20),
                 _buildRegisterButton(),
+                const SizedBox(height: 20),
+                if (_image != null)
+                  Image.file(_image!,
+                      height: 200), // Menampilkan gambar hasil capture
               ],
             ),
           ),
@@ -110,14 +129,14 @@ class _LoginPageState extends State<LoginPage> {
           child: CustomButton(
             title: 'Masuk',
             onPressed: () {
-              Navigator.push(
+              Navigator.pushReplacement(
                   context, MaterialPageRoute(builder: (context) => App()));
             },
           ),
         ),
         const SizedBox(width: 10),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: _getImageFromCamera, // Aksi saat tombol kamera ditekan
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.all(15),
             shape: RoundedRectangleBorder(
