@@ -154,7 +154,7 @@ class _HomePageState extends State<HomePage> {
         Row(
           children: [
             Expanded(
-                child: _buildPresenceMonthCard('Jatah WFH', '3', Icons.home)),
+                child: _buildPresenceMonthCard('Jatah WFA', '3', Icons.home)),
             const SizedBox(width: 16),
             Expanded(
                 child: _buildPresenceMonthCard(
