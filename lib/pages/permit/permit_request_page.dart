@@ -106,8 +106,8 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                       RadioListTile<String>(
                         contentPadding: EdgeInsets.zero, // Hilangkan padding bawaan
                         visualDensity: VisualDensity(horizontal: 0, vertical: -4), // Rapatkan vertikal
-                        title: const Text('WFH'),
-                        value: 'WFH',
+                        title: const Text('WFA (Work From Anywhere)'),
+                        value: 'WFA',
                         groupValue: _selectedPermitType,
                         activeColor: Colors.blue,
                         onChanged: (String? value) {
