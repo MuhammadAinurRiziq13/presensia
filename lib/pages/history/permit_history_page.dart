@@ -25,12 +25,14 @@ class PermitHistoryPage extends StatelessWidget {
         foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            // Add navigation back
-          },
-        ),
+        iconTheme: const IconThemeData(color: Colors.black),
+
+        // leading: IconButton(
+        //   icon: Icon(Icons.arrow_back, color: Colors.black),
+        //   onPressed: () {
+        //     // Add navigation back
+        //   },
+        // ),
       ),
       body: ListView(
         padding: EdgeInsets.all(screenWidth * 0.04), // Adjust padding for mobile
