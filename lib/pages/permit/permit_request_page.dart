@@ -157,7 +157,7 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                         borderRadius: BorderRadius.circular(8),
                         side: BorderSide(color: Colors.grey),
                       ),
-                      padding: EdgeInsets.symmetric(vertical: 18), // Tambahkan padding vertikal
+                      padding: EdgeInsets.symmetric(vertical: 12), // Tambahkan padding vertikal
                     ),
                   ),
                   const SizedBox(height: 20),
