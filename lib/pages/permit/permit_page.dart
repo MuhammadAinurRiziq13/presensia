@@ -40,7 +40,7 @@ class _PermitPageState extends State<PermitPage> {
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(10.0),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -49,6 +49,7 @@ class _PermitPageState extends State<PermitPage> {
                   ),
                 ],
               ),
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Column(
                 children: [
                   ListTile(
@@ -66,7 +67,7 @@ class _PermitPageState extends State<PermitPage> {
                     },
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                     child: Divider(height: 1, thickness: 1),
                   ),
                   ListTile(
