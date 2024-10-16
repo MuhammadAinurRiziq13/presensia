@@ -29,15 +29,18 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Perizinan'),
+        title: const Text(
+          'Perizinan',
+          style: TextStyle(color: Colors.black),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: const TextStyle(
-          color: Colors.black,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
+        // titleTextStyle: const TextStyle(
+        //   color: Colors.black,
+        //   fontSize: 20,
+        //   fontWeight: FontWeight.bold,
+        // ),
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SingleChildScrollView(

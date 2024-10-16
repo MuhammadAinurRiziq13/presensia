@@ -22,15 +22,13 @@ class _PermitPageState extends State<PermitPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Permit'),
+        title: const Text(
+          'Permit',
+          style: TextStyle(color: Colors.black),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: const TextStyle(
-          color: Colors.black,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: Padding(
