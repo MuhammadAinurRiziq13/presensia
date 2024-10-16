@@ -58,6 +58,7 @@ class _HistoryPageState extends State<HistoryPage> {
         ),
         backgroundColor: Colors.white,
         elevation: 0,
+        centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: Padding(
