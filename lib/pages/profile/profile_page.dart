@@ -44,7 +44,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
-        elevation: 1,
+        elevation: 0,
       ),
       body: SafeArea(
         child: Column(
