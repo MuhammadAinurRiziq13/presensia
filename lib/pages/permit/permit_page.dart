@@ -8,6 +8,7 @@
 // }
 
 import 'package:flutter/material.dart';
+import 'package:presensia/pages/history/permit_history_page.dart';
 import 'permit_request_page.dart'; // Import the PermitRequestPage
 
 class PermitPage extends StatefulWidget {
@@ -74,6 +75,12 @@ class _PermitPageState extends State<PermitPage> {
                     trailing: Icon(Icons.arrow_forward_ios),
                     onTap: () {
                       // Define navigation for Riwayat Perizinan if needed
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PermitHistoryPage(),
+                        ),
+                      );
                     },
                   ),
                 ],
