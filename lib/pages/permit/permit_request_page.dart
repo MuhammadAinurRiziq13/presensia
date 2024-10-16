@@ -60,29 +60,30 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Jenis Perizinan (dengan border abu-abu)
+                // Column yang berisi RadioListTile
                 Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey), // Add grey border
+                    border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(10.0),
                   ),
-                  padding: const EdgeInsets.all(16.0), // Add padding here for better spacing
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Mengurangi padding vertikal
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0), // Add bottom padding to create space
+                        padding: const EdgeInsets.only(bottom: 4.0), // Kurangi padding bawah untuk merapatkan label
                         child: Text(
                           "Silahkan Pilih :",
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
                       RadioListTile<String>(
-                        contentPadding: EdgeInsets.symmetric(vertical: 0.0),
-                        visualDensity: VisualDensity.compact, // Makes the radio buttons closer
+                        contentPadding: EdgeInsets.zero, // Hilangkan padding bawaan
+                        visualDensity: VisualDensity(horizontal: 0, vertical: -4), // Rapatkan vertikal
                         title: const Text('Sakit'),
                         value: 'Sakit',
                         groupValue: _selectedPermitType,
-                        activeColor: Colors.blue, // Set the active color to blue
+                        activeColor: Colors.blue,
                         onChanged: (String? value) {
                           setState(() {
                             _selectedPermitType = value!;
@@ -90,12 +91,12 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                         },
                       ),
                       RadioListTile<String>(
-                        contentPadding: EdgeInsets.symmetric(vertical: 0.0),
-                        visualDensity: VisualDensity.compact, // Makes the radio buttons closer
+                        contentPadding: EdgeInsets.zero, // Hilangkan padding bawaan
+                        visualDensity: VisualDensity(horizontal: 0, vertical: -4), // Rapatkan vertikal
                         title: const Text('Cuti'),
                         value: 'Cuti',
                         groupValue: _selectedPermitType,
-                        activeColor: Colors.blue, // Set the active color to blue
+                        activeColor: Colors.blue,
                         onChanged: (String? value) {
                           setState(() {
                             _selectedPermitType = value!;
@@ -103,12 +104,12 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                         },
                       ),
                       RadioListTile<String>(
-                        contentPadding: EdgeInsets.symmetric(vertical: 0.0),
-                        visualDensity: VisualDensity.compact, // Makes the radio buttons closer
+                        contentPadding: EdgeInsets.zero, // Hilangkan padding bawaan
+                        visualDensity: VisualDensity(horizontal: 0, vertical: -4), // Rapatkan vertikal
                         title: const Text('WFH'),
                         value: 'WFH',
                         groupValue: _selectedPermitType,
-                        activeColor: Colors.blue, // Set the active color to blue
+                        activeColor: Colors.blue,
                         onChanged: (String? value) {
                           setState(() {
                             _selectedPermitType = value!;
@@ -150,9 +151,10 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.blue,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(8),
                         side: BorderSide(color: Colors.grey),
                       ),
+                      padding: EdgeInsets.symmetric(vertical: 18), // Tambahkan padding vertikal
                     ),
                   ),
                   const SizedBox(height: 20),
