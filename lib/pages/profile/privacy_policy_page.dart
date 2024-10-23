@@ -15,8 +15,8 @@ class PrivacyPolicyPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
-          children: [
-            const Text(
+          children: const [
+            Text(
               'Kami menghargai privasi Anda dan berkomitmen untuk melindungi informasi pribadi Anda.',
               style: TextStyle(fontSize: 16),
             ),

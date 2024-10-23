@@ -9,6 +9,8 @@ import 'profile/profile_page.dart';
 import 'presensi/presensi_page.dart';
 
 class App extends StatefulWidget {
+  const App({super.key});
+
   @override
   _AppState createState() => _AppState();
 }
@@ -19,11 +21,11 @@ class _AppState extends State<App> {
   final ImagePicker _picker = ImagePicker();
 
   final List<Widget> _pages = [
-    HomePage(),
-    HistoryPage(),
+    const HomePage(),
+    const HistoryPage(),
     PresensiWidget(),
-    PermitPage(),
-    ProfilePage(),
+    const PermitPage(),
+    const ProfilePage(),
   ];
 
   Future<void> _getImageFromCamera() async {
@@ -54,19 +56,19 @@ class _AppState extends State<App> {
             ),
         ],
       ),
-      floatingActionButton: Container(
+      floatingActionButton: SizedBox(
         width: 65.0,
         height: 65.0,
         child: FloatingActionButton(
           onPressed:
               _getImageFromCamera, // Aksi memanggil kamera ketika tombol ditekan
           backgroundColor: Colors.blue,
+          shape: const CircleBorder(),
           child: Icon(
             Icons.camera_alt,
             color: Colors.white,
             size: 30.0,
           ),
-          shape: CircleBorder(),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -47,10 +47,10 @@ class _HomePageState extends State<HomePage> {
               'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg'),
         ),
         const SizedBox(width: 16),
-        Expanded(
+        const Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
                 'Anomalia',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -91,8 +91,8 @@ class _HomePageState extends State<HomePage> {
                 color: Colors.blue,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Row(
-                children: const [
+              child: const Row(
+                children: [
                   Icon(Icons.location_on, color: Colors.white, size: 16),
                   SizedBox(width: 4),
                   Text(
@@ -172,6 +172,7 @@ class _HomePageState extends State<HomePage> {
         onSubmit: () {
           setState(() => _showSlideButton = false);
           _showSuccessDialog(context);
+          return null;
         },
         text: 'Geser untuk keluar',
         textStyle: const TextStyle(fontSize: 14, color: Colors.white),

@@ -8,7 +8,7 @@ import 'dart:io'; // Import untuk menangani File
 import 'edit_profile_picture.dart'; // Import file baru
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -52,23 +52,26 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 20),
             Center(
               child: Stack(
-                children: [ 
+                children: [
                   CircleAvatar(
                     radius: 60,
                     backgroundImage: _imageFile != null
-                        ? FileImage(_imageFile!) // Menampilkan gambar yang dipilih
-                        : NetworkImage(
-                            'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg') as ImageProvider,
+                        ? FileImage(
+                            _imageFile!) // Menampilkan gambar yang dipilih
+                        : const NetworkImage(
+                                'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg')
+                            as ImageProvider,
                   ),
                   Positioned(
                     bottom: 0,
                     right: 0,
                     child: GestureDetector(
-                      onTap: _showEditProfilePicture, // Panggil fungsi untuk membuka halaman edit
+                      onTap:
+                          _showEditProfilePicture, // Panggil fungsi untuk membuka halaman edit
                       child: Container(
                         width: 40, // Lebar tombol
                         height: 40, // Tinggi tombol
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.blue, // Warna latar belakang
                         ),
@@ -117,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ProfileDetailPage()),
+                            builder: (context) => const ProfileDetailPage()),
                       );
                     },
                   ),
@@ -130,7 +133,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => HelpPage()),
+                            builder: (context) => const HelpPage()),
                       );
                     },
                   ),
@@ -143,7 +146,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => PrivacyPolicyPage()),
+                            builder: (context) => const PrivacyPolicyPage()),
                       );
                     },
                   ),
@@ -156,7 +159,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => TermsAndConditionsPage()),
+                            builder: (context) =>
+                                const TermsAndConditionsPage()),
                       );
                     },
                   ),
@@ -185,7 +189,8 @@ class _ProfilePageState extends State<ProfilePage> {
     return ListTile(
       leading: Icon(icon, color: Colors.blue),
       title: Text(text),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      trailing:
+          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
       onTap: onTap,
     );
   }
@@ -215,13 +220,13 @@ class _ProfilePageState extends State<ProfilePage> {
             TextButton(
               child: const Text('Batal'),
               onPressed: () {
-                Navigator.of(context).pop(); 
+                Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: const Text('Keluar', style: TextStyle(color: Colors.red)),
               onPressed: () {
-                Navigator.of(context).pop(); 
+                Navigator.of(context).pop();
 
                 // Back to login page
                 Navigator.of(context).pushAndRemoveUntil(

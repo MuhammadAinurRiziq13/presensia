@@ -15,8 +15,8 @@ class TermsAndConditionsPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
-          children: [
-            const Text(
+          children: const [
+            Text(
               'Dengan menggunakan aplikasi ini, Anda setuju untuk mematuhi syarat dan ketentuan aplikasi kami.\n',
               style: TextStyle(fontSize: 16),
             ),

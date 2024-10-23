@@ -5,10 +5,10 @@ class SlideToUnlockButton extends StatefulWidget {
   final String text;
 
   const SlideToUnlockButton({
-    Key? key,
+    super.key,
     required this.onSlideComplete,
     this.text = 'Geser Untuk Keluar',
-  }) : super(key: key);
+  });
 
   @override
   _SlideToUnlockButtonState createState() => _SlideToUnlockButtonState();
@@ -23,8 +23,8 @@ class _SlideToUnlockButtonState extends State<SlideToUnlockButton>
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 300));
     _animation = Tween<double>(begin: 0, end: 1)
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
   }
@@ -53,7 +53,7 @@ class _SlideToUnlockButtonState extends State<SlideToUnlockButton>
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final buttonSize = 60.0;
+        const buttonSize = 60.0;
         final maxDrag = constraints.maxWidth - buttonSize;
 
         return Container(
@@ -67,7 +67,7 @@ class _SlideToUnlockButtonState extends State<SlideToUnlockButton>
               Center(
                 child: Text(
                   widget.text,
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -83,11 +83,12 @@ class _SlideToUnlockButtonState extends State<SlideToUnlockButton>
                       child: Container(
                         width: buttonSize,
                         height: buttonSize,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.arrow_forward, color: Colors.red),
+                        child:
+                            const Icon(Icons.arrow_forward, color: Colors.red),
                       ),
                     ),
                   );
