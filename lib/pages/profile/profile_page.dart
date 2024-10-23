@@ -4,9 +4,34 @@ import 'profile_detail_page.dart';
 import 'help_page.dart';
 import 'privacy_policy_page.dart';
 import 'terms_and_conditions_page.dart';
+import 'dart:io'; // Import untuk menangani File
+import 'edit_profile_picture.dart'; // Import file baru
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
+
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  File? _imageFile; // Variabel untuk menyimpan gambar
+
+  // Fungsi untuk memilih gambar dari galeri
+  void _showEditProfilePicture() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditProfilePicturePage(
+          onImagePicked: (File? image) {
+            setState(() {
+              _imageFile = image; // Set gambar yang dipilih
+            });
+          },
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +44,7 @@ class ProfilePage extends StatelessWidget {
         ),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
-        elevation: 1,
+        elevation: 0,
       ),
       body: SafeArea(
         child: Column(
@@ -30,33 +55,33 @@ class ProfilePage extends StatelessWidget {
                 children: [ 
                   CircleAvatar(
                     radius: 60,
-                    backgroundImage: NetworkImage(
-                      'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg'),
-                 ),
-                Positioned(
-                bottom: 0,
-                right: 0,
-                child: GestureDetector(
-                  onTap: () {
-                    // Logika untuk mengedit foto profil
-                },
-                child: Container(
-                  width: 40, // Lebar tombol
-                  height: 40, // Tinggi tombol
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.blue, // Warna latar belakang
+                    backgroundImage: _imageFile != null
+                        ? FileImage(_imageFile!) // Menampilkan gambar yang dipilih
+                        : NetworkImage(
+                            'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg') as ImageProvider,
                   ),
-                  child: const Icon(
-                    Icons.edit,
-                    color: Colors.white, // Warna ikon
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: _showEditProfilePicture, // Panggil fungsi untuk membuka halaman edit
+                      child: Container(
+                        width: 40, // Lebar tombol
+                        height: 40, // Tinggi tombol
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue, // Warna latar belakang
+                        ),
+                        child: const Icon(
+                          Icons.edit,
+                          color: Colors.white, // Warna ikon
+                        ),
+                      ),
+                    ),
                   ),
+                ],
               ),
             ),
-                ),
-          ],
-        ),
-      ),
             const SizedBox(height: 20),
             const Text(
               'Anomalia',
@@ -160,8 +185,7 @@ class ProfilePage extends StatelessWidget {
     return ListTile(
       leading: Icon(icon, color: Colors.blue),
       title: Text(text),
-      trailing:
-          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
       onTap: onTap,
     );
   }
@@ -181,34 +205,34 @@ class ProfilePage extends StatelessWidget {
   }
 
   void _showLogoutDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Konfirmasi Keluar'),
-        content: const Text('Apakah Anda yakin ingin keluar?'),
-        actions: [
-          TextButton(
-            child: const Text('Batal'),
-            onPressed: () {
-              Navigator.of(context).pop(); 
-            },
-          ),
-          TextButton(
-            child: const Text('Keluar', style: TextStyle(color: Colors.red)),
-            onPressed: () {
-              Navigator.of(context).pop(); 
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Konfirmasi Keluar'),
+          content: const Text('Apakah Anda yakin ingin keluar?'),
+          actions: [
+            TextButton(
+              child: const Text('Batal'),
+              onPressed: () {
+                Navigator.of(context).pop(); 
+              },
+            ),
+            TextButton(
+              child: const Text('Keluar', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                Navigator.of(context).pop(); 
 
-              // Back to login page
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => const SplashScreen()),
-                (Route<dynamic> route) => false,
-              );
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+                // Back to login page
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const SplashScreen()),
+                  (Route<dynamic> route) => false,
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
