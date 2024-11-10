@@ -1,13 +1,31 @@
 import 'package:flutter/material.dart';
-// Import login.dart
-import 'package:presensia/pages/splash_screen/splash_screen.dart'; // Import splash_screen.dart
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:presensia/presentation/screens/splash_screen/splash_screen.dart';
+import 'core/config/routes.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  // Pastikan Flutter telah diinisialisasi
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Menangkap error global (opsional)
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.dumpErrorToConsole(details);
+  };
+
+  // Memeriksa apakah pengguna sudah login (opsional)
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('auth_token');
+
+  // Tentukan initialRoute berdasarkan token
+  String initialRoute = token != null ? '/home' : '/';
+
+  runApp(MyApp(initialRoute: initialRoute));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String initialRoute;
+
+  const MyApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +35,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const SplashScreen(), 
+      initialRoute: initialRoute, // Gunakan initialRoute yang ditentukan
+      onGenerateRoute: AppRoutes.generateRoute,
     );
   }
 }
