@@ -39,6 +39,12 @@ dependencies:
   cupertino_icons: ^1.0.6
   image_picker: ^1.1.2
   slide_to_act: ^2.0.2
+  bloc: ^8.1.4
+  flutter_bloc: ^8.1.6
+  dio_interceptor_plus: ^0.0.2
+  equatable: ^2.0.5
+  dio: ^5.7.0
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:

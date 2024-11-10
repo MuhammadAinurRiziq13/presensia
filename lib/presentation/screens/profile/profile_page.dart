@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:presensia/pages/splash_screen/splash_screen.dart';
+import 'package:presensia/presentation/screens/splash_screen/splash_screen.dart';
 import 'profile_detail_page.dart';
 import 'help_page.dart';
 import 'privacy_policy_page.dart';
@@ -27,36 +27,36 @@ class ProfilePage extends StatelessWidget {
             const SizedBox(height: 20),
             Center(
               child: Stack(
-                children: [ 
+                children: [
                   CircleAvatar(
                     radius: 60,
                     backgroundImage: NetworkImage(
-                      'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg'),
-                 ),
-                Positioned(
-                bottom: 0,
-                right: 0,
-                child: GestureDetector(
-                  onTap: () {
-                    // Logika untuk mengedit foto profil
-                },
-                child: Container(
-                  width: 40, // Lebar tombol
-                  height: 40, // Tinggi tombol
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.blue, // Warna latar belakang
+                        'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg'),
                   ),
-                  child: const Icon(
-                    Icons.edit,
-                    color: Colors.white, // Warna ikon
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () {
+                        // Logika untuk mengedit foto profil
+                      },
+                      child: Container(
+                        width: 40, // Lebar tombol
+                        height: 40, // Tinggi tombol
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue, // Warna latar belakang
+                        ),
+                        child: const Icon(
+                          Icons.edit,
+                          color: Colors.white, // Warna ikon
+                        ),
+                      ),
+                    ),
                   ),
+                ],
               ),
             ),
-                ),
-          ],
-        ),
-      ),
             const SizedBox(height: 20),
             const Text(
               'Anomalia',
@@ -104,8 +104,7 @@ class ProfilePage extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => HelpPage()),
+                        MaterialPageRoute(builder: (context) => HelpPage()),
                       );
                     },
                   ),
@@ -181,34 +180,34 @@ class ProfilePage extends StatelessWidget {
   }
 
   void _showLogoutDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Konfirmasi Keluar'),
-        content: const Text('Apakah Anda yakin ingin keluar?'),
-        actions: [
-          TextButton(
-            child: const Text('Batal'),
-            onPressed: () {
-              Navigator.of(context).pop(); 
-            },
-          ),
-          TextButton(
-            child: const Text('Keluar', style: TextStyle(color: Colors.red)),
-            onPressed: () {
-              Navigator.of(context).pop(); 
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Konfirmasi Keluar'),
+          content: const Text('Apakah Anda yakin ingin keluar?'),
+          actions: [
+            TextButton(
+              child: const Text('Batal'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Keluar', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                Navigator.of(context).pop();
 
-              // Back to login page
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => const SplashScreen()),
-                (Route<dynamic> route) => false,
-              );
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+                // Back to login page
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const SplashScreen()),
+                  (Route<dynamic> route) => false,
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

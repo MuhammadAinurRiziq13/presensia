@@ -8,7 +8,7 @@
 // }
 
 import 'package:flutter/material.dart';
-import 'package:presensia/pages/history/permit_history_page.dart';
+import 'package:presensia/presentation/screens/history/permit_history_page.dart';
 import 'permit_request_page.dart'; // Import the PermitRequestPage
 
 class PermitPage extends StatefulWidget {
@@ -66,7 +66,8 @@ class _PermitPageState extends State<PermitPage> {
                     },
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 16.0),
                     child: Divider(height: 1, thickness: 1),
                   ),
                   ListTile(
