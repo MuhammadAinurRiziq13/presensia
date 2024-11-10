@@ -5,10 +5,10 @@ class BottomAppBarWidget extends StatelessWidget {
   final ValueChanged<int> onTabSelected;
 
   const BottomAppBarWidget({
-    super.key,
+    Key? key,
     required this.currentIndex,
     required this.onTabSelected,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,13 +16,13 @@ class BottomAppBarWidget extends StatelessWidget {
       color: Colors.white,
       elevation: 10.0,
       notchMargin: 10.0,
-      shape: const CircularNotchedRectangle(),
+      shape: CircularNotchedRectangle(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           _buildBottomNavItem(Icons.home, 'Home', 0),
           _buildBottomNavItem(Icons.history, 'History', 1),
-          const SizedBox(width: 40), // Space for the FloatingActionButton
+          SizedBox(width: 40), // Space for the FloatingActionButton
           _buildBottomNavItem(Icons.mail, 'Permit', 3),
           _buildBottomNavItem(Icons.person, 'Profile', 4),
         ],
@@ -43,7 +43,7 @@ class BottomAppBarWidget extends StatelessWidget {
             color: currentIndex == index ? Colors.blue : Colors.grey,
             size: 30.0,
           ),
-          const SizedBox(height: 4.0),
+          SizedBox(height: 4.0),
           Text(
             label,
             style: TextStyle(

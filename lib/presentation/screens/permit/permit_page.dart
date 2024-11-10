@@ -8,7 +8,7 @@
 // }
 
 import 'package:flutter/material.dart';
-import 'package:presensia/presentation/screens/history/permit_history_page.dart';
+import '../history/permit_history_page.dart';
 import 'permit_request_page.dart'; // Import the PermitRequestPage
 
 class PermitPage extends StatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:presensia/presentation/screens/splash_screen/splash_screen.dart';
+import '../splash_screen/splash_screen.dart';
 import 'profile_detail_page.dart';
 import 'help_page.dart';
 import 'privacy_policy_page.dart';
@@ -55,20 +55,23 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundImage: NetworkImage(
-                        'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg'),
+                    backgroundImage: _imageFile != null
+                        ? FileImage(
+                            _imageFile!) // Menampilkan gambar yang dipilih
+                        : const NetworkImage(
+                                'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg')
+                            as ImageProvider,
                   ),
                   Positioned(
                     bottom: 0,
                     right: 0,
                     child: GestureDetector(
-                      onTap: () {
-                        // Logika untuk mengedit foto profil
-                      },
+                      onTap:
+                          _showEditProfilePicture, // Panggil fungsi untuk membuka halaman edit
                       child: Container(
                         width: 40, // Lebar tombol
                         height: 40, // Tinggi tombol
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.blue, // Warna latar belakang
                         ),
@@ -129,7 +132,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => HelpPage()),
+                        MaterialPageRoute(
+                            builder: (context) => const HelpPage()),
                       );
                     },
                   ),
