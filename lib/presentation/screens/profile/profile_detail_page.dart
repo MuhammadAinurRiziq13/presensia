@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ProfileDetailPage extends StatefulWidget {
-  const ProfileDetailPage({Key? key}) : super(key: key);
+  const ProfileDetailPage({super.key});
 
   @override
   _ProfileDetailPageState createState() => _ProfileDetailPageState();
@@ -82,7 +82,7 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
                   obscureText: !_isOldPasswordVisible,
                   decoration: InputDecoration(
                     labelText: 'Password Lama',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isOldPasswordVisible
@@ -104,7 +104,7 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
                   obscureText: !_isNewPasswordVisible,
                   decoration: InputDecoration(
                     labelText: 'Password Baru',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isNewPasswordVisible
@@ -131,7 +131,8 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       backgroundColor: Colors.blue, // Warna tombol biru
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0), // Samakan pojokan tombol
+                        borderRadius: BorderRadius.circular(
+                            12.0), // Samakan pojokan tombol
                       ),
                     ),
                     child: const Text(

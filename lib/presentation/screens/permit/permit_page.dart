@@ -44,7 +44,7 @@ class _PermitPageState extends State<PermitPage> {
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
                     blurRadius: 10,
-                    offset: Offset(0, 5),
+                    offset: const Offset(0, 5),
                   ),
                 ],
               ),
@@ -52,9 +52,9 @@ class _PermitPageState extends State<PermitPage> {
               child: Column(
                 children: [
                   ListTile(
-                    leading: Icon(Icons.mail_outline, color: Colors.blue),
-                    title: Text('Perizinan'),
-                    trailing: Icon(Icons.arrow_forward_ios),
+                    leading: const Icon(Icons.mail_outline, color: Colors.blue),
+                    title: const Text('Perizinan'),
+                    trailing: const Icon(Icons.arrow_forward_ios),
                     onTap: () {
                       // Navigate to PermitRequestPage when tapped
                       Navigator.push(
@@ -65,15 +65,21 @@ class _PermitPageState extends State<PermitPage> {
                       );
                     },
                   ),
+<<<<<<< HEAD:lib/presentation/screens/permit/permit_page.dart
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: 8.0, horizontal: 16.0),
+=======
+                  const Padding(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+>>>>>>> 0aa2a329511ab12089781e71567e3a40d7a75679:lib/pages/permit/permit_page.dart
                     child: Divider(height: 1, thickness: 1),
                   ),
                   ListTile(
-                    leading: Icon(Icons.history, color: Colors.blue),
-                    title: Text('Riwayat Perizinan'),
-                    trailing: Icon(Icons.arrow_forward_ios),
+                    leading: const Icon(Icons.history, color: Colors.blue),
+                    title: const Text('Riwayat Perizinan'),
+                    trailing: const Icon(Icons.arrow_forward_ios),
                     onTap: () {
                       // Define navigation for Riwayat Perizinan if needed
                       Navigator.push(

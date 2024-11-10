@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Untuk format tanggal
 
 class PermitRequestPage extends StatefulWidget {
+  const PermitRequestPage({super.key});
+
   @override
   _PermitRequestPageState createState() => _PermitRequestPageState();
 }
@@ -9,7 +11,8 @@ class PermitRequestPage extends StatefulWidget {
 class _PermitRequestPageState extends State<PermitRequestPage> {
   String _selectedPermitType = 'Cuti'; // Default tipe izin
   DateTimeRange? _selectedDateRange; // Menyimpan range tanggal
-  TextEditingController _remarksController = TextEditingController(); // Kontrol untuk input keterangan
+  final TextEditingController _remarksController =
+      TextEditingController(); // Kontrol untuk input keterangan
 
   // Fungsi untuk memilih range tanggal
   Future<void> _selectDateRange(BuildContext context) async {
@@ -54,7 +57,7 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
                   blurRadius: 10,
-                  offset: Offset(0, 5),
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
@@ -69,20 +72,27 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(10.0),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Mengurangi padding vertikal
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0), // Mengurangi padding vertikal
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0), // Kurangi padding bawah untuk merapatkan label
+                      const Padding(
+                        padding: EdgeInsets.only(
+                            bottom:
+                                4.0), // Kurangi padding bawah untuk merapatkan label
                         child: Text(
                           "Silahkan Pilih :",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
                       RadioListTile<String>(
-                        contentPadding: EdgeInsets.zero, // Hilangkan padding bawaan
-                        visualDensity: VisualDensity(horizontal: 0, vertical: -4), // Rapatkan vertikal
+                        contentPadding:
+                            EdgeInsets.zero, // Hilangkan padding bawaan
+                        visualDensity: const VisualDensity(
+                            horizontal: 0, vertical: -4), // Rapatkan vertikal
                         title: const Text('Sakit'),
                         value: 'Sakit',
                         groupValue: _selectedPermitType,
@@ -94,8 +104,10 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                         },
                       ),
                       RadioListTile<String>(
-                        contentPadding: EdgeInsets.zero, // Hilangkan padding bawaan
-                        visualDensity: VisualDensity(horizontal: 0, vertical: -4), // Rapatkan vertikal
+                        contentPadding:
+                            EdgeInsets.zero, // Hilangkan padding bawaan
+                        visualDensity: const VisualDensity(
+                            horizontal: 0, vertical: -4), // Rapatkan vertikal
                         title: const Text('Cuti'),
                         value: 'Cuti',
                         groupValue: _selectedPermitType,
@@ -107,8 +119,10 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                         },
                       ),
                       RadioListTile<String>(
-                        contentPadding: EdgeInsets.zero, // Hilangkan padding bawaan
-                        visualDensity: VisualDensity(horizontal: 0, vertical: -4), // Rapatkan vertikal
+                        contentPadding:
+                            EdgeInsets.zero, // Hilangkan padding bawaan
+                        visualDensity: const VisualDensity(
+                            horizontal: 0, vertical: -4), // Rapatkan vertikal
                         title: const Text('WFA (Work From Anywhere)'),
                         value: 'WFA',
                         groupValue: _selectedPermitType,
@@ -122,7 +136,7 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                     ],
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
 
                 // Kondisi untuk tampilan sesuai jenis izin
                 if (_selectedPermitType == 'Sakit') ...[
@@ -133,7 +147,8 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                       labelStyle: const TextStyle(color: Colors.grey),
                       floatingLabelStyle: const TextStyle(color: Colors.blue),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2.0),
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       border: OutlineInputBorder(
@@ -148,16 +163,17 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                     onPressed: () {
                       // Logika untuk mengunggah dokumen
                     },
-                    icon: Icon(Icons.upload_file),
-                    label: Text('Unggah Dokumen'),
+                    icon: const Icon(Icons.upload_file),
+                    label: const Text('Unggah Dokumen'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.blue,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
-                        side: BorderSide(color: Colors.grey),
+                        side: const BorderSide(color: Colors.grey),
                       ),
-                      padding: EdgeInsets.symmetric(vertical: 12), // Tambahkan padding vertikal
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12), // Tambahkan padding vertikal
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -169,9 +185,10 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10.0),
-                        border: Border.all(color: Colors.grey), // Add grey border
+                        border:
+                            Border.all(color: Colors.grey), // Add grey border
                       ),
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -182,20 +199,23 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                                 _selectedDateRange == null
                                     ? 'Pilih Tanggal'
                                     : '${DateFormat('dd MMM yyyy').format(_selectedDateRange!.start)} - ${DateFormat('dd MMM yyyy').format(_selectedDateRange!.end)}',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
                               ),
-                              Icon(Icons.edit, color: Colors.blue),
+                              const Icon(Icons.edit, color: Colors.blue),
                             ],
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           _selectedDateRange == null
-                              ? Text('Tanggal Mulai - Tanggal Akhir', style: TextStyle(color: Colors.grey))
-                              : CalendarDateRangeWidget(dateRange: _selectedDateRange!)
+                              ? const Text('Tanggal Mulai - Tanggal Akhir',
+                                  style: TextStyle(color: Colors.grey))
+                              : CalendarDateRangeWidget(
+                                  dateRange: _selectedDateRange!)
                         ],
                       ),
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
                   // Input Keterangan
                   TextField(
@@ -205,7 +225,8 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                       labelStyle: const TextStyle(color: Colors.grey),
                       floatingLabelStyle: const TextStyle(color: Colors.blue),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.blue, width: 2.0),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2.0),
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       border: OutlineInputBorder(
@@ -221,16 +242,17 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                   onPressed: () {
                     // Aksi ketika tombol kirim ditekan
                   },
-                  child: Text(
-                    'Kirim',
-                    style: TextStyle(color: Colors.white), // Set text color to white
-                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
+                  ),
+                  child: Text(
+                    'Kirim',
+                    style: TextStyle(
+                        color: Colors.white), // Set text color to white
                   ),
                 ),
               ],
@@ -246,7 +268,7 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
 class CalendarDateRangeWidget extends StatelessWidget {
   final DateTimeRange dateRange;
 
-  const CalendarDateRangeWidget({required this.dateRange});
+  const CalendarDateRangeWidget({super.key, required this.dateRange});
 
   @override
   Widget build(BuildContext context) {
@@ -259,19 +281,22 @@ class CalendarDateRangeWidget extends StatelessWidget {
     String endMonth = DateFormat('MMMM').format(endDate); // e.g. "February"
 
     // Calculate total number of days in the range
-    int daysCount = endDate.difference(startDate).inDays + 1; // Include the start day
+    int daysCount =
+        endDate.difference(startDate).inDays + 1; // Include the start day
 
     // Prepare the display text
     String displayText;
     if (startMonth == endMonth) {
-      displayText = '$startMonth (${daysCount} hari)'; // Same month
+      displayText = '$startMonth ($daysCount hari)'; // Same month
     } else {
-      displayText = '$startMonth - $endMonth (${daysCount} hari)'; // Different months
+      displayText =
+          '$startMonth - $endMonth ($daysCount hari)'; // Different months
     }
 
     return Text(
       displayText,
-      style: TextStyle(fontSize: 16, color: Colors.blue, fontWeight: FontWeight.bold),
+      style: const TextStyle(
+          fontSize: 16, color: Colors.blue, fontWeight: FontWeight.bold),
     );
   }
 }

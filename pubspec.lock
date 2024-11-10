@@ -73,6 +73,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.7.0"
+<<<<<<< HEAD
   dio_interceptor_plus:
     dependency: "direct main"
     description:
@@ -81,6 +82,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.2"
+=======
+>>>>>>> 0aa2a329511ab12089781e71567e3a40d7a75679
   dio_web_adapter:
     dependency: transitive
     description:
@@ -89,6 +92,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+<<<<<<< HEAD
   equatable:
     dependency: "direct main"
     description:
@@ -97,6 +101,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.5"
+=======
+>>>>>>> 0aa2a329511ab12089781e71567e3a40d7a75679
   fake_async:
     dependency: transitive
     description:

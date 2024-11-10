@@ -4,9 +4,34 @@ import 'profile_detail_page.dart';
 import 'help_page.dart';
 import 'privacy_policy_page.dart';
 import 'terms_and_conditions_page.dart';
+import 'dart:io'; // Import untuk menangani File
+import 'edit_profile_picture.dart'; // Import file baru
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  File? _imageFile; // Variabel untuk menyimpan gambar
+
+  // Fungsi untuk memilih gambar dari galeri
+  void _showEditProfilePicture() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditProfilePicturePage(
+          onImagePicked: (File? image) {
+            setState(() {
+              _imageFile = image; // Set gambar yang dipilih
+            });
+          },
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +44,7 @@ class ProfilePage extends StatelessWidget {
         ),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
-        elevation: 1,
+        elevation: 0,
       ),
       body: SafeArea(
         child: Column(
@@ -92,7 +117,7 @@ class ProfilePage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ProfileDetailPage()),
+                            builder: (context) => const ProfileDetailPage()),
                       );
                     },
                   ),
@@ -117,7 +142,7 @@ class ProfilePage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => PrivacyPolicyPage()),
+                            builder: (context) => const PrivacyPolicyPage()),
                       );
                     },
                   ),
@@ -130,7 +155,8 @@ class ProfilePage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => TermsAndConditionsPage()),
+                            builder: (context) =>
+                                const TermsAndConditionsPage()),
                       );
                     },
                   ),

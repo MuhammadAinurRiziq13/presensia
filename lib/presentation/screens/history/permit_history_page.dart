@@ -5,6 +5,8 @@ void main() {
 }
 
 class PermitApp extends StatelessWidget {
+  const PermitApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -14,13 +16,15 @@ class PermitApp extends StatelessWidget {
 }
 
 class PermitHistoryPage extends StatelessWidget {
+  const PermitHistoryPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Riwayat Perizinan'),
+        title: const Text('Riwayat Perizinan'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -35,7 +39,8 @@ class PermitHistoryPage extends StatelessWidget {
         // ),
       ),
       body: ListView(
-        padding: EdgeInsets.all(screenWidth * 0.04), // Adjust padding for mobile
+        padding:
+            EdgeInsets.all(screenWidth * 0.04), // Adjust padding for mobile
         children: [
           PermitCard(
             name: 'Anomalia',
@@ -67,7 +72,7 @@ class PermitHistoryPage extends StatelessWidget {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1, // Current tab index (History tab selected)
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
@@ -99,6 +104,7 @@ class PermitCard extends StatelessWidget {
   final double screenWidth;
 
   const PermitCard({
+    super.key,
     required this.name,
     required this.date,
     required this.permitType,
@@ -114,7 +120,7 @@ class PermitCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 4,
@@ -124,7 +130,8 @@ class PermitCard extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundImage: AssetImage('assets/avatar.png'), // Placeholder avatar
+            backgroundImage:
+                const AssetImage('assets/avatar.png'), // Placeholder avatar
             radius: screenWidth * 0.1, // Responsive radius for mobile
           ),
           SizedBox(width: screenWidth * 0.04),
@@ -140,13 +147,16 @@ class PermitCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: screenWidth * 0.02),
-                Text('Tanggal: $date', style: TextStyle(fontSize: screenWidth * 0.04)),
-                Text('Jenis Izin: $permitType', style: TextStyle(fontSize: screenWidth * 0.04)),
+                Text('Tanggal: $date',
+                    style: TextStyle(fontSize: screenWidth * 0.04)),
+                Text('Jenis Izin: $permitType',
+                    style: TextStyle(fontSize: screenWidth * 0.04)),
               ],
             ),
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenWidth * 0.02),
+            padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.04, vertical: screenWidth * 0.02),
             decoration: BoxDecoration(
               color: statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
