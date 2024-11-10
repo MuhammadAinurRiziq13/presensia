@@ -65,15 +65,9 @@ class _PermitPageState extends State<PermitPage> {
                       );
                     },
                   ),
-<<<<<<< HEAD:lib/presentation/screens/permit/permit_page.dart
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 16.0),
-=======
                   const Padding(
                     padding:
                         EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
->>>>>>> 0aa2a329511ab12089781e71567e3a40d7a75679:lib/pages/permit/permit_page.dart
                     child: Divider(height: 1, thickness: 1),
                   ),
                   ListTile(
