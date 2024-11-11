@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/register/register_bloc.dart';
 import '../../blocs/register/register_event.dart';
 import '../../blocs/register/register_state.dart';
+import 'package:another_flushbar/flushbar.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -55,13 +56,19 @@ class _RegisterPageState extends State<RegisterPage> {
     return BlocConsumer<RegisterBloc, RegisterState>(
       listener: (context, state) {
         if (state is RegisterSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
+          Flushbar(
+            message:
                 'Pendaftaran berhasil! Selamat datang, ${state.pegawai.namaPegawai ?? 'Pengguna'}',
-              ),
+            icon: Icon(
+              Icons.check_circle,
+              color: Colors.green,
             ),
-          );
+            duration: Duration(seconds: 3),
+            backgroundColor: Colors.blueAccent,
+            margin: EdgeInsets.all(8),
+            borderRadius: BorderRadius.circular(8),
+            flushbarPosition: FlushbarPosition.TOP,
+          )..show(context);
           Navigator.pushReplacementNamed(context, '/login');
         } else if (state is RegisterFailure) {
           setState(() {

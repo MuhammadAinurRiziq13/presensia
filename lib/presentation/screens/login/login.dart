@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:presensia/domain/usecases/login_usecase.dart';
+import 'package:another_flushbar/flushbar.dart';
 import '../../blocs/login/login_bloc.dart';
 import '../../blocs/login/login_event.dart';
 import '../../blocs/login/login_state.dart';
@@ -33,13 +34,20 @@ class _LoginPageState extends State<LoginPage> {
       listener: (context, state) {
         if (state is LoginSuccess) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Selamat datang, ${state.pegawai.namaPegawai}'),
+            Flushbar(
+              message: 'Selamat datang, ${state.pegawai.namaPegawai}',
+              icon: Icon(
+                Icons.check_circle,
+                color: Colors.green,
               ),
-            );
-            Navigator.pushReplacementNamed(
-                context, '/home'); // Navigate to home
+              duration: Duration(seconds: 3),
+              backgroundColor: Colors.blueAccent,
+              margin: EdgeInsets.all(8),
+              borderRadius: BorderRadius.circular(8),
+              flushbarPosition: FlushbarPosition.TOP,
+            )..show(context);
+
+            Navigator.pushReplacementNamed(context, '/home');
           }
         } else if (state is LoginFailure) {
           // Atur error berdasarkan pesan backend
