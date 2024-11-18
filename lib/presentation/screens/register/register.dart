@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/register/register_bloc.dart';
 import '../../blocs/register/register_event.dart';
 import '../../blocs/register/register_state.dart';
-import 'package:another_flushbar/flushbar.dart';
+import '../../../core/utils/flushbar_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -19,11 +21,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final _alamatController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  final FocusNode _noPegawaiFocus = FocusNode();
-  final FocusNode _noHpFocus = FocusNode();
-  final FocusNode _alamatFocus = FocusNode();
-  final FocusNode _passwordFocus = FocusNode();
-
   String? _noPegawaiError;
   String? _noHpError;
   String? _alamatError;
@@ -35,10 +32,6 @@ class _RegisterPageState extends State<RegisterPage> {
     _noHpController.dispose();
     _alamatController.dispose();
     _passwordController.dispose();
-    _noPegawaiFocus.dispose();
-    _noHpFocus.dispose();
-    _alamatFocus.dispose();
-    _passwordFocus.dispose();
     super.dispose();
   }
 
@@ -56,20 +49,12 @@ class _RegisterPageState extends State<RegisterPage> {
     return BlocConsumer<RegisterBloc, RegisterState>(
       listener: (context, state) {
         if (state is RegisterSuccess) {
-          Flushbar(
-            message:
-                'Pendaftaran berhasil! Selamat datang, ${state.pegawai.namaPegawai ?? 'Pengguna'}',
-            icon: Icon(
-              Icons.check_circle,
-              color: Colors.green,
-            ),
-            duration: Duration(seconds: 3),
-            backgroundColor: Colors.blueAccent,
-            margin: EdgeInsets.all(8),
-            borderRadius: BorderRadius.circular(8),
-            flushbarPosition: FlushbarPosition.TOP,
-          )..show(context);
-          Navigator.pushReplacementNamed(context, '/login');
+          SharedPreferences.getInstance().then((prefs) {
+            prefs.setBool('isRegistered', true);
+          });
+
+          // Navigasi ke halaman login
+          context.go('/login');
         } else if (state is RegisterFailure) {
           setState(() {
             if (state.errorMessage.contains('Nomor pegawai')) {
@@ -83,12 +68,8 @@ class _RegisterPageState extends State<RegisterPage> {
             }
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.errorMessage),
-              duration: const Duration(seconds: 3),
-            ),
-          );
+          // Tampilkan Flushbar error
+          showErrorFlushbar(context, state.errorMessage);
         }
       },
       builder: (context, state) {
@@ -126,7 +107,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 30),
                     TextField(
                       controller: _noPegawaiController,
-                      focusNode: _noPegawaiFocus,
                       cursorColor: Colors.blue,
                       enabled: !(state is RegisterLoading),
                       decoration: InputDecoration(
@@ -142,13 +122,10 @@ class _RegisterPageState extends State<RegisterPage> {
                               const BorderSide(color: Colors.blue, width: 2.0),
                         ),
                       ),
-                      onSubmitted: (_) =>
-                          FocusScope.of(context).requestFocus(_noHpFocus),
                     ),
                     const SizedBox(height: 20),
                     TextField(
                       controller: _alamatController,
-                      focusNode: _alamatFocus,
                       cursorColor: Colors.blue,
                       enabled: !(state is RegisterLoading),
                       decoration: InputDecoration(
@@ -164,13 +141,10 @@ class _RegisterPageState extends State<RegisterPage> {
                               const BorderSide(color: Colors.blue, width: 2.0),
                         ),
                       ),
-                      onSubmitted: (_) =>
-                          FocusScope.of(context).requestFocus(_passwordFocus),
                     ),
                     const SizedBox(height: 20),
                     TextField(
                       controller: _noHpController,
-                      focusNode: _noHpFocus,
                       cursorColor: Colors.blue,
                       enabled: !(state is RegisterLoading),
                       decoration: InputDecoration(
@@ -186,13 +160,10 @@ class _RegisterPageState extends State<RegisterPage> {
                               const BorderSide(color: Colors.blue, width: 2.0),
                         ),
                       ),
-                      onSubmitted: (_) =>
-                          FocusScope.of(context).requestFocus(_alamatFocus),
                     ),
                     const SizedBox(height: 20),
                     TextField(
                       controller: _passwordController,
-                      focusNode: _passwordFocus,
                       obscureText: _isObscure,
                       cursorColor: Colors.blue,
                       enabled: !(state is RegisterLoading),
@@ -313,7 +284,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         const Text("Sudah punya akun?"),
                         TextButton(
                           onPressed: () {
-                            Navigator.pushReplacementNamed(context, '/login');
+                            context.go('/login');
                           },
                           child: const Text(
                             "Login Disini",

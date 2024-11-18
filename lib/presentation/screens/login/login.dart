@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:presensia/domain/usecases/login_usecase.dart';
-import 'package:another_flushbar/flushbar.dart';
 import '../../blocs/login/login_bloc.dart';
 import '../../blocs/login/login_event.dart';
 import '../../blocs/login/login_state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/utils/flushbar_helper.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -29,40 +30,67 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _checkRegistrationStatus();
+  }
+
+  // Memeriksa status registrasi dari SharedPreferences
+  void _checkRegistrationStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool? isRegistered = prefs.getBool('isRegistered') ?? false;
+
+    if (isRegistered) {
+      // Jika registrasi berhasil, tampilkan Flushbar sukses
+      showSuccessFlushbar(
+          context, 'Pendaftaran berhasil! Selamat datang di aplikasi!');
+
+      // Setelah Flushbar ditampilkan, reset status registrasi
+      prefs.setBool('isRegistered', false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocConsumer<LoginBloc, LoginState>(
       listener: (context, state) {
         if (state is LoginSuccess) {
           if (mounted) {
-            Flushbar(
-              message: 'Selamat datang, ${state.pegawai.namaPegawai}',
-              icon: Icon(
-                Icons.check_circle,
-                color: Colors.green,
-              ),
-              duration: Duration(seconds: 3),
-              backgroundColor: Colors.blueAccent,
-              margin: EdgeInsets.all(8),
-              borderRadius: BorderRadius.circular(8),
-              flushbarPosition: FlushbarPosition.TOP,
-            )..show(context);
-
-            Navigator.pushReplacementNamed(context, '/home');
+            SharedPreferences.getInstance().then((prefs) {
+              prefs.setBool('isLogined', true);
+            });
+            context.go('/home'); // Navigate to home
           }
         } else if (state is LoginFailure) {
-          // Atur error berdasarkan pesan backend
-          setState(() {
-            if (state.errorMessage.contains('Nomor pegawai')) {
-              _noPegawaiError = state.errorMessage;
-              _passwordError = null;
-            } else if (state.errorMessage.contains('Password')) {
-              _passwordError = state.errorMessage;
+          // Set error for Flushbar only if it's the login failure message
+          if (state.errorMessage
+              .contains('Nomor pegawai atau password salah')) {
+            // Show error via Flushbar only
+            showErrorFlushbar(context, state.errorMessage);
+
+            // Reset TextField errors to null
+            setState(() {
               _noPegawaiError = null;
-            } else {
-              _noPegawaiError = state.errorMessage;
-              _passwordError = state.errorMessage;
-            }
-          });
+              _passwordError = null;
+            });
+          } else {
+            // Handle other errors, for example show them in TextField
+            setState(() {
+              if (state.errorMessage.contains('Nomor pegawai')) {
+                _noPegawaiError = state.errorMessage;
+                _passwordError = null;
+              } else if (state.errorMessage.contains('Password')) {
+                _passwordError = state.errorMessage;
+                _noPegawaiError = null;
+              } else {
+                _noPegawaiError = state.errorMessage;
+                _passwordError = state.errorMessage;
+              }
+            });
+
+            // Optionally show the general errors in Flushbar too
+            showErrorFlushbar(context, state.errorMessage);
+          }
         }
       },
       builder: (context, state) {
@@ -109,6 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                     // Nomor Pegawai TextField
                     TextField(
                       controller: _noPegawaiController,
+                      cursorColor: Colors.blue,
                       enabled: !(state is LoginLoading),
                       decoration: InputDecoration(
                         labelText: 'Nomor Pegawai',
@@ -129,6 +158,7 @@ class _LoginPageState extends State<LoginPage> {
                     // Password TextField
                     TextField(
                       controller: _passwordController,
+                      cursorColor: Colors.blue,
                       obscureText: _isObscure,
                       enabled: !(state is LoginLoading),
                       decoration: InputDecoration(
@@ -258,8 +288,7 @@ class _LoginPageState extends State<LoginPage> {
                         const Text("Belum punya akun?"),
                         TextButton(
                           onPressed: () {
-                            Navigator.pushReplacementNamed(
-                                context, '/register');
+                            context.go('/register');
                           },
                           child: const Text(
                             "Daftar Disini",

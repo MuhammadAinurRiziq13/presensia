@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/utils/flushbar_helper.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -10,6 +13,27 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _showSlideButton = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  // Memeriksa status registrasi dari SharedPreferences
+  void _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool? isLogined = prefs.getBool('isLogined') ?? false;
+
+    if (isLogined) {
+      // Jika registrasi berhasil, tampilkan Flushbar sukses
+      showSuccessFlushbar(
+          context, 'Login berhasil! Selamat datang di aplikasi!');
+
+      // Setelah Flushbar ditampilkan, reset status registrasi
+      prefs.setBool('isLogined', false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
