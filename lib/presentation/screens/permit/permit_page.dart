@@ -24,7 +24,7 @@ class _PermitPageState extends State<PermitPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Permit',
+          'Perizinan',
           style: TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.white,
@@ -53,14 +53,13 @@ class _PermitPageState extends State<PermitPage> {
                 children: [
                   ListTile(
                     leading: const Icon(Icons.mail_outline, color: Colors.blue),
-                    title: const Text('Perizinan'),
+                    title: const Text('Ajukan Perizinan'),
                     trailing: const Icon(Icons.arrow_forward_ios),
                     onTap: () {
-                      // Navigate to PermitRequestPage when tapped
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PermitRequestPage(),
+                          builder: (context) => const PermitRequestPage(),
                         ),
                       );
                     },
@@ -75,11 +74,10 @@ class _PermitPageState extends State<PermitPage> {
                     title: const Text('Riwayat Perizinan'),
                     trailing: const Icon(Icons.arrow_forward_ios),
                     onTap: () {
-                      // Define navigation for Riwayat Perizinan if needed
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PermitHistoryPage(),
+                          builder: (context) => const PermitHistoryPage(),
                         ),
                       );
                     },
@@ -93,6 +91,7 @@ class _PermitPageState extends State<PermitPage> {
     );
   }
 }
+
 //   int _currentIndex = 3; // Set to 3 to open the PermitPage initially
 
 //   final List<Widget> _pages = [
