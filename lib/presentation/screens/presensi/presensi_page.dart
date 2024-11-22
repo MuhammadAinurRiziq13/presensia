@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 
-class PresensiWidget extends StatelessWidget {
-  const PresensiWidget({super.key});
+class PresensiPage extends StatelessWidget {
+  const PresensiPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Camera Placeholder'));
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Presensi Page'),
+      ),
+      body: const Center(
+        child: Text('Camera Placeholder'),
+      ),
+    );
   }
 }
