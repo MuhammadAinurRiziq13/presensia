@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:slide_to_act/slide_to_act.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart'; // Import shimmer package
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/flushbar_helper.dart';
+import '../../blocs/home/home_bloc.dart';
+import '../../blocs/home/home_state.dart';
+import '../../blocs/home/home_event.dart';
+import '../../../presentation/widgets/bottom_navigation.dart';
+import 'package:go_router/go_router.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,25 +17,25 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _showSlideButton = true;
-
   @override
   void initState() {
     super.initState();
     _checkLoginStatus();
+    _fetchAllData();
   }
 
-  // Memeriksa status registrasi dari SharedPreferences
+  void _fetchAllData() async {
+    context.read<AttendanceBloc>().add(FetchAllDataEvent());
+  }
+
   void _checkLoginStatus() async {
+    // Memeriksa status login dari SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     bool? isLogined = prefs.getBool('isLogined') ?? false;
 
     if (isLogined) {
-      // Jika registrasi berhasil, tampilkan Flushbar sukses
       showSuccessFlushbar(
           context, 'Login berhasil! Selamat datang di aplikasi!');
-
-      // Setelah Flushbar ditampilkan, reset status registrasi
       prefs.setBool('isLogined', false);
     }
   }
@@ -39,196 +44,244 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              _buildProfileSection(),
-              const SizedBox(height: 20),
-              _buildDateAndLocation(),
-              const SizedBox(height: 20),
-              _buildDailyPresenceSection(),
-              const SizedBox(height: 20),
-              _buildMonthlyPresenceSection(),
-              const SizedBox(height: 20),
-              if (_showSlideButton) _buildSliderButton(context),
-              const SizedBox(height: 20),
-            ],
+        child: RefreshIndicator(
+          onRefresh: () async {
+            _fetchAllData(); // Memanggil ulang data saat layar ditarik
+          },
+          child: SingleChildScrollView(
+            physics:
+                const AlwaysScrollableScrollPhysics(), // Agar tetap bisa scroll meski datanya sedikit
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                // Profile Section
+                Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 30,
+                      backgroundImage: NetworkImage(
+                          'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg'),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: BlocBuilder<AttendanceBloc, AttendanceState>(
+                        builder: (context, state) {
+                          if (state is AttendanceAndUserSuccess) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  state.user.namaPegawai ?? '---',
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  state.user.jabatan ?? '---',
+                                  style: const TextStyle(
+                                      fontSize: 15, color: Colors.grey),
+                                ),
+                              ],
+                            );
+                          } else if (state is AttendanceLoading) {
+                            return Shimmer.fromColors(
+                              baseColor: Colors.grey[300]!,
+                              highlightColor: Colors.grey[100]!,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    height: 18,
+                                    width: 100,
+                                    color: Colors.grey,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    height: 15,
+                                    width: 80,
+                                    color: Colors.grey,
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          return const SizedBox();
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.grey),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.notifications,
+                          color: Colors.blue, size: 28),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                // Date and Location Section
+                BlocBuilder<AttendanceBloc, AttendanceState>(
+                  builder: (context, state) {
+                    if (state is AttendanceAndUserSuccess) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            state.currentDate,
+                            style: const TextStyle(
+                                fontSize: 14, color: Colors.grey),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.location_on,
+                                    color: Colors.white, size: 16),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Lowokwaru, Malang',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    return const SizedBox();
+                  },
+                ),
+                const SizedBox(height: 20),
+                // Daily Presence Section
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Presensi hari ini',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    const SizedBox(height: 8),
+                    BlocBuilder<AttendanceBloc, AttendanceState>(
+                      builder: (context, state) {
+                        if (state is AttendanceLoading) {
+                          // Show shimmer loading skeleton
+                          return Column(
+                            children: [
+                              _buildSkeleton(),
+                            ],
+                          );
+                        } else if (state is AttendanceAndUserSuccess) {
+                          final attendance = state.attendance;
+
+                          // Placeholder values for empty data
+                          final masuk = attendance.isNotEmpty &&
+                                  attendance[0].waktuMasuk != null
+                              ? attendance[0]
+                                  .formatDate(attendance[0].waktuMasuk)
+                              : '---';
+                          final keluar = attendance.isNotEmpty &&
+                                  attendance[0].waktuKeluar != null
+                              ? attendance[0]
+                                  .formatDate(attendance[0].waktuKeluar)
+                              : '---';
+                          final totalJam = attendance.isNotEmpty &&
+                                  attendance[0].totalJam != null
+                              ? attendance[0].totalJam
+                              : '---';
+                          final statusAbsen = attendance.isNotEmpty &&
+                                  attendance[0].statusAbsen.isNotEmpty
+                              ? attendance[0].statusAbsen
+                              : '---';
+
+                          return Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildPresenceCard(
+                                        'Masuk', masuk, Icons.login),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: _buildPresenceCard(
+                                        'Keluar', keluar, Icons.logout),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildPresenceCard(
+                                        'Total Jam', totalJam, Icons.timer),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: _buildPresenceCard(
+                                        'Status Kehadiran',
+                                        statusAbsen,
+                                        Icons.check),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          );
+                        } else if (state is AttendanceFailure) {
+                          return Center(
+                            child: Text(
+                              state.errorMessage,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          );
+                        }
+                        return Container(); // Return empty container if no state is loaded
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildProfileSection() {
-    return Row(
-      children: [
-        const CircleAvatar(
-          radius: 30,
-          backgroundImage: NetworkImage(
-              'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg'),
-        ),
-        const SizedBox(width: 16),
-        const Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Anomalia',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'Mobile Developer',
-                style: TextStyle(fontSize: 15, color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
+      floatingActionButton: SizedBox(
+        width: 65.0,
+        height: 65.0,
+        child: FloatingActionButton(
+          onPressed: () {
+            // Navigasi ke halaman presensi
+            GoRouter.of(context).go('/presensi');
+          },
+          backgroundColor: Colors.blue,
+          shape: const CircleBorder(),
+          child: const Icon(
+            Icons.camera_alt,
+            size: 35.0, // Ukuran ikon lebih besar
             color: Colors.white,
-            border: Border.all(color: Colors.grey),
-            shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.notifications, color: Colors.blue, size: 28),
+          heroTag: 'fab-home', // Tag unik untuk FAB di halaman ini
         ),
-      ],
-    );
-  }
-
-  Widget _buildDateAndLocation() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          'Minggu, 16 September 2024',
-          style: TextStyle(fontSize: 14, color: Colors.grey),
-        ),
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.location_on, color: Colors.white, size: 16),
-                  SizedBox(width: 4),
-                  Text(
-                    'Lowokwaru, Malang',
-                    style: TextStyle(color: Colors.white, fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDailyPresenceSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Presensi hari ini',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-                child: _buildPresenceDayCard('Masuk', '08:30', Icons.login)),
-            const SizedBox(width: 16),
-            Expanded(
-                child: _buildPresenceDayCard('Keluar', '17:30', Icons.logout)),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-                child:
-                    _buildPresenceDayCard('Total Jam', '10:00', Icons.timer)),
-            const SizedBox(width: 16),
-            Expanded(
-                child: _buildPresenceDayCard(
-                    'Status Kehadiran', 'On Time', Icons.check)),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMonthlyPresenceSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Presensi Bulan Ini',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-                child: _buildPresenceMonthCard('Jatah WFA', '3', Icons.home)),
-            const SizedBox(width: 16),
-            Expanded(
-                child: _buildPresenceMonthCard(
-                    'Jatah Cuti', '4', Icons.calendar_today)),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSliderButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: SlideAction(
-        onSubmit: () {
-          setState(() => _showSlideButton = false);
-          _showSuccessDialog(context);
-          return null;
-        },
-        text: 'Geser untuk keluar',
-        textStyle: const TextStyle(fontSize: 14, color: Colors.white),
-        sliderButtonIcon:
-            const Icon(Icons.arrow_forward, color: Colors.red, size: 20),
-        innerColor: Colors.white,
-        outerColor: Colors.red,
-        height: 65,
-        borderRadius: 10,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: const BottomNavigationWidget(
+        currentIndex: 0, // Index tab aktif untuk halaman Home
       ),
     );
   }
 
-  void _showSuccessDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Berhasil'),
-          content: const Text('Anda berhasil keluar'),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildPresenceDayCard(String title, String time, IconData icon) {
+  Widget _buildPresenceCard(String title, String time, IconData icon) {
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -254,7 +307,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 8),
             Text(
-              time,
+              time, // This will display either time or "---"
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ],
@@ -263,50 +316,61 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildPresenceMonthCard(String title, String time, IconData icon) {
-    return Card(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8.0),
+  // Skeleton for each of the cards
+  Widget _buildSkeleton() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 120,
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 177, 216, 248),
+                    color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(icon, color: Colors.blue, size: 20),
                 ),
-                const SizedBox(width: 8),
-                Expanded(child: Text(title)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            RichText(
-              text: TextSpan(
-                style: const TextStyle(color: Colors.black),
-                children: [
-                  TextSpan(
-                    text: time,
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const TextSpan(
-                    text: " Hari",
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.normal),
-                  ),
-                ],
               ),
-            ),
-          ],
-        ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:presensia/presentation/screens/home/home_page.dart';
 import 'package:presensia/presentation/screens/login/login.dart';
 import 'package:presensia/presentation/screens/register/register.dart';
 import 'package:presensia/presentation/screens/splash_screen/splash_screen.dart';
-import 'package:presensia/presentation/screens/app.dart';
+import 'package:presensia/presentation/screens/profile/profile_page.dart';
+import 'package:presensia/presentation/screens/permit/permit_page.dart';
+import 'package:presensia/presentation/screens/history/history_page.dart';
+import 'package:presensia/presentation/screens/presensi/presensi_page.dart';
 import 'package:presensia/domain/usecases/register_usecase.dart';
 import 'package:presensia/domain/usecases/login_usecase.dart';
 import 'package:presensia/data/repositories/auth_repository_impl.dart';
@@ -13,6 +17,11 @@ import 'package:presensia/core/utils/dio_client/dio_client.dart';
 import 'package:presensia/core/utils/constants.dart';
 import 'package:presensia/presentation/blocs/register/register_bloc.dart';
 import 'package:presensia/presentation/blocs/login/login_bloc.dart';
+import 'package:presensia/presentation/blocs/home/home_bloc.dart';
+import 'package:presensia/data/datasources/home_api_datasource.dart';
+import 'package:presensia/data/repositories/home_repository_impl.dart';
+import 'package:presensia/domain/usecases/get_today_attendance_usecase.dart';
+import 'package:presensia/domain/usecases/get_user_usecase.dart';
 
 class AppRoutes {
   static final DioClient dioClient = DioClient(baseUrl: Constants.baseUrl);
@@ -20,13 +29,13 @@ class AppRoutes {
   static final GoRouter router = GoRouter(
     initialLocation: '/',
     routes: [
-      // Route SplashScreen
+      // SplashScreen Route
       GoRoute(
         path: '/',
         builder: (context, state) => const SplashScreen(),
       ),
 
-      // Route Login
+      // Login Route
       GoRoute(
         path: '/login',
         builder: (context, state) {
@@ -44,7 +53,7 @@ class AppRoutes {
         },
       ),
 
-      // Route Register
+      // Register Route
       GoRoute(
         path: '/register',
         builder: (context, state) {
@@ -62,12 +71,58 @@ class AppRoutes {
         },
       ),
 
-      // Route Home
+      // Home Route
+// Home Route
       GoRoute(
         path: '/home',
-        builder: (context, state) => const App(),
+        builder: (context, state) {
+          // Inisialisasi datasource, repository, dan use cases
+          final attendanceApiDataSource = AttendanceApiDataSource(dioClient);
+          final attendanceRepository =
+              AttendanceRepositoryImpl(attendanceApiDataSource);
+
+          final getTodaysAttendanceUseCase =
+              GetTodaysAttendanceUseCase(attendanceRepository);
+          final getUserUseCase = GetUserUseCase(
+              attendanceRepository); // Use case baru untuk getUser
+
+          // Inisialisasi Bloc dengan dua use cases
+          return BlocProvider(
+            create: (_) => AttendanceBloc(
+              getTodaysAttendanceUseCase,
+              getUserUseCase,
+            ),
+            child: const HomePage(),
+          );
+        },
+      ),
+
+      // History Route
+      GoRoute(
+        path: '/history',
+        builder: (context, state) => const HistoryPage(),
+      ),
+
+      // Permit Route
+      GoRoute(
+        path: '/permit',
+        builder: (context, state) => const PermitPage(),
+      ),
+
+      // Profile Route
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfilePage(),
+      ),
+
+      // Presensi Route
+      GoRoute(
+        path: '/presensi',
+        builder: (context, state) => const PresensiPage(),
       ),
     ],
+
+    // Error Handling
     errorBuilder: (context, state) {
       return const Scaffold(
         body: Center(

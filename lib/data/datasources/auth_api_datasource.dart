@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/models/pegawai_model.dart';
 import '../../core/utils/dio_client/dio_client.dart';
