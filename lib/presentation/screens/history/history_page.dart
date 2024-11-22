@@ -1,6 +1,10 @@
-import 'dart:math'; // Add this for Random
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart'; // For the calendar widget
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:presensia/presentation/blocs/history/history_bloc.dart';
+import 'package:presensia/presentation/blocs/history/history_event.dart';
+import 'package:presensia/presentation/blocs/history/history_state.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -11,39 +15,40 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   DateTime selectedDate = DateTime.now();
-  List<Map<String, String>> attendanceData = [];
+  bool isLoadingIdPegawai = true; // Flag untuk loading ID Pegawai
 
   @override
   void initState() {
     super.initState();
-    _generateAttendanceData(); // Generate attendance data for September until today
+    _loadIdPegawai(); // Memuat ID pegawai saat initState
   }
 
-  // Function to generate random attendance data
-  void _generateAttendanceData() {
-    List<String> days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-    Random random = Random();
+  Future<void> _loadIdPegawai() async {
+    final prefs = await SharedPreferences.getInstance();
+    final idPegawai = prefs.getInt('id_pegawai');
 
-    // Start from 1 September
-    DateTime startDate = DateTime(DateTime.now().year, 9, 1);
-    // End at the current date (today)
-    DateTime endDate = DateTime.now();
+    // Tambahkan log debugging untuk melihat apakah ID Pegawai berhasil diambil
+    print('ID Pegawai dari SharedPreferences: $idPegawai');
 
-    // Generate data for each day from 1 September to today
-    for (DateTime date = startDate;
-        date.isBefore(endDate) ||
-            date.isAtSameMomentAs(endDate); // Make sure to include the endDate
-        date = date.add(const Duration(days: 1))) {
-      String dayName = days[date.weekday % 7]; // Get day name (Min, Sen, etc.)
-      bool isOnTime = random.nextBool(); // Random status for on-time or late
-
-      attendanceData.add({
-        "date": date.toIso8601String(), // Use ISO format for better accuracy
-        "day": dayName, // Get the name of the day
-        "entryTime": "08:30",
-        "exitTime": "17:30",
-        "status": isOnTime ? "OnTime" : "Late",
-        "location": "Lowokwaru, Malang, Jawa Timur"
+    if (idPegawai != null) {
+      // Setelah ID berhasil diambil, kirim event ke bloc dan set loading menjadi false
+      BlocProvider.of<HistoryBloc>(context)
+          .add(GetHistoryButtonPressed(idPegawai: idPegawai));
+      setState(() {
+        isLoadingIdPegawai = false; // Set loading ke false
+      });
+    } else {
+      // Jika ID tidak ditemukan, tampilkan SnackBar dan set loading ke false
+      Future.delayed(Duration.zero, () {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('ID Pegawai tidak ditemukan')),
+          );
+        }
+      });
+      setState(() {
+        isLoadingIdPegawai =
+            false; // Set loading ke false meskipun ID tidak ada
       });
     }
   }
@@ -61,26 +66,29 @@ class _HistoryPageState extends State<HistoryPage> {
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCalendar(),
-            const SizedBox(height: 16.0),
-            const Text(
-              'Presensi Anda',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16.0),
-            Expanded(child: _buildAttendanceList()),
-          ],
-        ),
-      ),
+      body: isLoadingIdPegawai
+          ? const Center(
+              child: CircularProgressIndicator()) // Loading ID Pegawai
+          : _buildHistoryContent(),
     );
   }
 
-  // Widget to build the calendar at the top
+  Widget _buildHistoryContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildCalendar(),
+        const SizedBox(height: 16.0),
+        const Text(
+          'Presensi Anda',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16.0),
+        Expanded(child: _buildAttendanceList()),
+      ],
+    );
+  }
+
   Widget _buildCalendar() {
     return TableCalendar(
       firstDay: DateTime.utc(2020, 1, 1),
@@ -89,7 +97,7 @@ class _HistoryPageState extends State<HistoryPage> {
       selectedDayPredicate: (day) => isSameDay(selectedDate, day),
       onDaySelected: (selectedDay, focusedDay) {
         setState(() {
-          selectedDate = selectedDay; // Update the selected date
+          selectedDate = selectedDay;
         });
       },
       calendarStyle: const CalendarStyle(
@@ -111,112 +119,60 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
-  // Function to build the list of attendance data for the selected date
   Widget _buildAttendanceList() {
-    // Filter data by selected date
-    final selectedDayData = attendanceData.where((item) {
-      DateTime itemDate = DateTime.parse(item['date']!);
-      return isSameDay(itemDate, selectedDate);
-    }).toList();
+    return BlocBuilder<HistoryBloc, HistoryState>(
+      builder: (context, state) {
+        if (state is HistoryLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is HistoryLoaded) {
+          final selectedDayData = state.absensiList.where((item) {
+            return isSameDay(item.tanggal, selectedDate);
+          }).toList();
 
-    if (selectedDayData.isEmpty) {
-      return const Center(child: Text("Tidak ada kehadiran dalam hari ini"));
-    }
+          if (selectedDayData.isEmpty) {
+            return const Center(
+                child: Text("Tidak ada absensi untuk tanggal ini."));
+          }
 
-    return ListView.builder(
-      itemCount: selectedDayData.length,
-      itemBuilder: (context, index) {
-        final item = selectedDayData[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                _buildDateSection(item['date']!, item['day']!),
-                const SizedBox(width: 16.0),
-                Expanded(child: _buildAttendanceDetails(item)),
-              ],
+          return ListView.builder(
+            itemCount: selectedDayData.length,
+            itemBuilder: (context, index) {
+              final item = selectedDayData[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 8.0),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor:
+                        item.statusAbsen == 'Hadir' ? Colors.green : Colors.red,
+                    child: Text(item.tanggal.day.toString()),
+                  ),
+                  title: Text('Status: ${item.statusAbsen}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                          'Waktu Masuk: ${item.waktuMasuk?.hour ?? '--'}:${item.waktuMasuk?.minute ?? '--'}'),
+                      Text(
+                          'Waktu Keluar: ${item.waktuKeluar?.hour ?? '--'}:${item.waktuKeluar?.minute ?? '--'}'),
+                      Text('Lokasi: ${item.lokasiAbsen ?? "Tidak tersedia"}'),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        } else if (state is HistoryFailure) {
+          return Center(
+            child: Text(
+              'Error: ${state.errorMessage}',
+              style: const TextStyle(color: Colors.red),
+              textAlign: TextAlign.center,
             ),
-          ),
-        );
+          );
+        } else {
+          return const Center(child: Text('Tekan tombol untuk memuat data.'));
+        }
       },
-    );
-  }
-
-  // Widget to build the left side date section
-  Widget _buildDateSection(String date, String day) {
-    DateTime parsedDate = DateTime.parse(date);
-    return Container(
-      width: 70,
-      height: 70,
-      decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            parsedDate.day.toString(),
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          Text(
-            day,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Widget to build the details of each attendance record
-  Widget _buildAttendanceDetails(Map<String, String> item) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildEntryExitTimes('Masuk', item['entryTime']!),
-            _buildEntryExitTimes('Keluar', item['exitTime']!),
-            _buildStatus(item['status']!),
-          ],
-        ),
-        const SizedBox(height: 8.0),
-        Row(
-          children: [
-            const Icon(Icons.location_on, color: Colors.blue, size: 16),
-            const SizedBox(width: 4.0),
-            Text(item['location']!, style: const TextStyle(color: Colors.grey)),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // Widget to display entry and exit times
-  Widget _buildEntryExitTimes(String label, String time) {
-    return Column(
-      children: [
-        Text(label, style: const TextStyle(color: Colors.grey)),
-        Text(time, style: const TextStyle(fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-
-  // Widget to display status
-  Widget _buildStatus(String status) {
-    return Text(
-      status,
-      style: TextStyle(
-        color: status == "OnTime" ? Colors.green : Colors.red,
-        fontWeight: FontWeight.bold,
-      ),
     );
   }
 }
