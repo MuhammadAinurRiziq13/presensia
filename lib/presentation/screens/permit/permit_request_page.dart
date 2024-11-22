@@ -10,20 +10,18 @@ class PermitRequestPage extends StatefulWidget {
 
 class _PermitRequestPageState extends State<PermitRequestPage> {
   String _selectedPermitType = 'Cuti'; // Default tipe izin
-  DateTimeRange? _selectedDateRange; // Menyimpan range tanggal
-  final TextEditingController _remarksController =
-      TextEditingController(); // Kontrol untuk input keterangan
+  DateTimeRange? _dateRange; // Menyimpan range tanggal
+  final TextEditingController _remarksController = TextEditingController();
 
-  // Fungsi untuk memilih range tanggal
   Future<void> _selectDateRange(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
+    final DateTimeRange? pickedDateRange = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
       lastDate: DateTime(2025),
     );
-    if (picked != null && picked != _selectedDateRange) {
+    if (pickedDateRange != null && pickedDateRange != _dateRange) {
       setState(() {
-        _selectedDateRange = picked;
+        _dateRange = pickedDateRange;
       });
     }
   }
@@ -33,17 +31,12 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Perizinan',
+          'Ajukan Perizinan',
           style: TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        // titleTextStyle: const TextStyle(
-        //   color: Colors.black,
-        //   fontSize: 20,
-        //   fontWeight: FontWeight.bold,
-        // ),
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SingleChildScrollView(
@@ -65,38 +58,25 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Jenis Perizinan (dengan border abu-abu)
-                // Column yang berisi RadioListTile
                 Container(
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 8.0), // Mengurangi padding vertikal
+                      horizontal: 16.0, vertical: 8.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.only(
-                            bottom:
-                                4.0), // Kurangi padding bawah untuk merapatkan label
-                        child: Text(
-                          "Silahkan Pilih :",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
+                      const Text(
+                        "Jenis Perizinan:",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       RadioListTile<String>(
-                        contentPadding:
-                            EdgeInsets.zero, // Hilangkan padding bawaan
-                        visualDensity: const VisualDensity(
-                            horizontal: 0, vertical: -4), // Rapatkan vertikal
                         title: const Text('Sakit'),
                         value: 'Sakit',
                         groupValue: _selectedPermitType,
-                        activeColor: Colors.blue,
                         onChanged: (String? value) {
                           setState(() {
                             _selectedPermitType = value!;
@@ -104,14 +84,9 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                         },
                       ),
                       RadioListTile<String>(
-                        contentPadding:
-                            EdgeInsets.zero, // Hilangkan padding bawaan
-                        visualDensity: const VisualDensity(
-                            horizontal: 0, vertical: -4), // Rapatkan vertikal
                         title: const Text('Cuti'),
                         value: 'Cuti',
                         groupValue: _selectedPermitType,
-                        activeColor: Colors.blue,
                         onChanged: (String? value) {
                           setState(() {
                             _selectedPermitType = value!;
@@ -119,14 +94,9 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                         },
                       ),
                       RadioListTile<String>(
-                        contentPadding:
-                            EdgeInsets.zero, // Hilangkan padding bawaan
-                        visualDensity: const VisualDensity(
-                            horizontal: 0, vertical: -4), // Rapatkan vertikal
                         title: const Text('WFA (Work From Anywhere)'),
                         value: 'WFA',
                         groupValue: _selectedPermitType,
-                        activeColor: Colors.blue,
                         onChanged: (String? value) {
                           setState(() {
                             _selectedPermitType = value!;
@@ -137,123 +107,40 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Kondisi untuk tampilan sesuai jenis izin
-                if (_selectedPermitType == 'Sakit') ...[
-                  // Input Keterangan (untuk izin Sakit)
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Keterangan',
-                      labelStyle: const TextStyle(color: Colors.grey),
-                      floatingLabelStyle: const TextStyle(color: Colors.blue),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Colors.blue, width: 2.0),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Tombol Unggah Dokumen
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      // Logika untuk mengunggah dokumen
-                    },
-                    icon: const Icon(Icons.upload_file),
-                    label: const Text('Unggah Dokumen'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        side: const BorderSide(color: Colors.grey),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12), // Tambahkan padding vertikal
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ] else ...[
-                  // Input tanggal dan keterangan untuk Cuti dan WFH
+                if (_selectedPermitType != 'Sakit')
                   GestureDetector(
                     onTap: () => _selectDateRange(context),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        border: Border.all(color: Colors.grey),
                         borderRadius: BorderRadius.circular(10.0),
-                        border:
-                            Border.all(color: Colors.grey), // Add grey border
                       ),
                       padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                _selectedDateRange == null
-                                    ? 'Pilih Tanggal'
-                                    : '${DateFormat('dd MMM yyyy').format(_selectedDateRange!.start)} - ${DateFormat('dd MMM yyyy').format(_selectedDateRange!.end)}',
-                                style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                              const Icon(Icons.edit, color: Colors.blue),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          _selectedDateRange == null
-                              ? const Text('Tanggal Mulai - Tanggal Akhir',
-                                  style: TextStyle(color: Colors.grey))
-                              : CalendarDateRangeWidget(
-                                  dateRange: _selectedDateRange!)
-                        ],
+                      child: Text(
+                        _dateRange == null
+                            ? 'Pilih Tanggal'
+                            : '${DateFormat('dd MMM yyyy').format(_dateRange!.start)} - ${DateFormat('dd MMM yyyy').format(_dateRange!.end)}',
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-
-                  // Input Keterangan
-                  TextField(
-                    controller: _remarksController,
-                    decoration: InputDecoration(
-                      labelText: 'Keterangan',
-                      labelStyle: const TextStyle(color: Colors.grey),
-                      floatingLabelStyle: const TextStyle(color: Colors.blue),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Colors.blue, width: 2.0),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _remarksController,
+                  decoration: InputDecoration(
+                    labelText: 'Keterangan',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                ],
-
-                // Tombol Kirim
+                ),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
                     // Aksi ketika tombol kirim ditekan
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                  ),
-                  child: Text(
-                    'Kirim',
-                    style: TextStyle(
-                        color: Colors.white), // Set text color to white
-                  ),
+                  child: const Text('Kirim'),
                 ),
               ],
             ),
@@ -263,6 +150,7 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
     );
   }
 }
+
 
 // Widget untuk menampilkan range tanggal pada kalender
 class CalendarDateRangeWidget extends StatelessWidget {
