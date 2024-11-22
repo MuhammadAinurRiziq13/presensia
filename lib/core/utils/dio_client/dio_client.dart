@@ -13,6 +13,10 @@ class DioClient {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
+          validateStatus: (status) {
+            // Menonaktifkan validasi status untuk kode selain 2xx
+            return status! < 500; // Menganggap status selain 5xx tidak masalah
+          },
         )) {
     _dio.interceptors.add(
       InterceptorsWrapper(
@@ -45,12 +49,35 @@ class DioClient {
   Dio get client => _dio;
 
   Future<Response> get(String endpoint,
-      {Map<String, dynamic>? queryParams}) async {
-    return await _dio.get(endpoint, queryParameters: queryParams);
+      {Map<String, dynamic>? queryParams, Options? options}) async {
+    // Jika options tidak disediakan, buat options baru
+    options ??= Options();
+    try {
+      final response = await _dio.get(endpoint,
+          queryParameters: queryParams, options: options);
+
+      // Jika perlu, bisa melakukan pengecekan khusus untuk status tertentu
+      if (response.statusCode == 404) {
+        // Menangani error 404 secara manual
+        throw DioException(
+          type: DioErrorType.badResponse, // Perbaikan konstanta
+          requestOptions: response.requestOptions,
+          response: response, // Sertakan response jika dibutuhkan
+          error: 'Endpoint tidak ditemukan: $endpoint',
+        );
+      }
+
+      return response;
+    } catch (e) {
+      print("Error occurred: $e");
+      rethrow;
+    }
   }
 
   Future<Response> post(String endpoint,
       {Map<String, dynamic>? data, Options? options}) async {
+    // Jika options tidak disediakan, buat options baru
+    options ??= Options();
     return await _dio.post(endpoint, data: data, options: options);
   }
 }
