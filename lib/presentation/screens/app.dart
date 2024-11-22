@@ -63,7 +63,7 @@ class _AppState extends State<App> {
     final List<Widget> _pages = [
       const HomePage(),
       const HistoryPage(),
-      PresensiWidget(),
+      const PresensiWidget(),
       const PermitPage(),
       const ProfilePage(),
     ];
