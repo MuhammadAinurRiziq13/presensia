@@ -1,6 +1,6 @@
-import 'package:presensia/data/datasources/history_api_datasource.dart';
-import 'package:presensia/domain/entities/absensi.dart';
-import 'package:presensia/domain/repositories/history_repository.dart';
+import '../datasources/history_api_datasource.dart';
+import '../../domain/entities/absensi.dart';
+import '../../domain/repositories/history_repository.dart';
 
 class HistoryRepositoryImpl implements HistoryRepository {
   final HistoryApiDataSource _historyApiDataSource;
@@ -10,14 +10,16 @@ class HistoryRepositoryImpl implements HistoryRepository {
   @override
   Future<List<AbsensiEntity>> getHistory(int idPegawai) async {
     try {
-      // Pastikan id_pegawai adalah integer
-      if (idPegawai is! int) {
-        throw Exception('id_pegawai harus berupa integer');
-      }
+      // Mendapatkan data dari data source yang berupa List<AbsensiModel>
+      final absensiModels = await _historyApiDataSource.getHistory(idPegawai);
 
-      return await _historyApiDataSource.getHistory({"id_pegawai": idPegawai});
+      // Mengkonversi List<AbsensiModel> ke List<AbsensiEntity>
+      return absensiModels
+          .map((model) => AbsensiEntity.fromModel(model))
+          .toList();
     } catch (e) {
-      throw Exception('Repository error: $e');
+      print('Error fetching history: ${e.toString()}');
+      rethrow;
     }
   }
 }

@@ -1,30 +1,38 @@
-import 'package:dio/dio.dart';
-import 'package:presensia/domain/entities/absensi.dart';
+import '../../data/models/absensi_model.dart';
+import '../../core/utils/dio_client/dio_client.dart';
 
 class HistoryApiDataSource {
-  final Dio _dio;
+  final DioClient _dioClient;
 
-  HistoryApiDataSource(this._dio);
+  HistoryApiDataSource(this._dioClient);
 
-  Future<List<AbsensiEntity>> getHistory(
-      Map<String, dynamic> queryParameters) async {
+  Future<List<AbsensiModel>> getHistory(int idPegawai) async {
     try {
-      final idPegawai = queryParameters['id_pegawai'];
-      print('Mencoba mengambil history untuk ID Pegawai: $idPegawai');
+      // Kirim permintaan ke API
+      final response = await _dioClient.get(
+        '/history',
+        queryParams: {'id_pegawai': idPegawai},
+      );
 
-      final response = await _dio
-          .get('/history', queryParameters: {'id_pegawai': idPegawai});
-
+      // Cek status code respon
       if (response.statusCode == 200) {
-        final List data = response.data;
-        print('Data berhasil diterima: ${data.length} item');
-        return data.map((json) => AbsensiEntity.fromJson(json)).toList();
+        print('Response JSON: ${response.data}');
+
+        // Ambil data absensi dari respon
+        List? data = response.data['data'];
+        if (data == null || data.isEmpty) {
+          return [];
+        }
+
+        // Mapping JSON menjadi List<AbsensiModel>
+        return data.map((item) => AbsensiModel.fromJson(item)).toList();
       } else {
-        throw Exception('Failed to load history');
+        // Jika status code bukan 200, lempar exception dengan pesan dari server
+        throw Exception(response.data['message'] ?? 'Failed to fetch history');
       }
     } catch (e) {
-      print('Error saat mengambil history: $e');
-      throw Exception('Error loading history: $e');
+      // Tangani error dan log pesan error
+      throw Exception('Error loading history: ${e.toString()}');
     }
   }
 }

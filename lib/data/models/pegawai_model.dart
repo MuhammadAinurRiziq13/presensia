@@ -25,7 +25,7 @@ class PegawaiModel extends PegawaiEntity {
 
   factory PegawaiModel.fromJson(Map<String, dynamic> json) {
     return PegawaiModel(
-      id: json['id_pegawai'] as int?, // Mengambil id_pegawai
+      id: json['id_pegawai'] as int?,
       idLevel: json['id_level'] as int?,
       namaPegawai: json['nama_pegawai'] ?? '',
       noPegawai: json['no_pegawai'] ?? 0,

@@ -31,7 +31,8 @@ class PermitRepository {
   }
 
   Future<void> approvePermit(int id) async {
-    final response = await http.put(Uri.parse('$baseUrl/perizinan/$id/approve'));
+    final response =
+        await http.put(Uri.parse('$baseUrl/perizinan/$id/approve'));
     if (response.statusCode != 200) {
       throw Exception('Failed to approve permit');
     }

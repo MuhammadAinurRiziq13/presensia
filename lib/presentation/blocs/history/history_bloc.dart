@@ -1,30 +1,38 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'history_event.dart';
+import 'history_state.dart';
 import 'package:presensia/domain/usecases/history_usecase.dart';
-import 'package:presensia/presentation/blocs/history/history_event.dart';
-import 'package:presensia/presentation/blocs/history/history_state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
-  final GetHistoryUseCase _getHistoryUseCase;
+  final GetHistoryUseCase getHistoryUseCase;
 
-  HistoryBloc(this._getHistoryUseCase) : super(HistoryInitial()) {
+  HistoryBloc(this.getHistoryUseCase) : super(HistoryInitial()) {
     on<GetHistoryButtonPressed>(_onGetHistoryButtonPressed);
   }
-
   Future<void> _onGetHistoryButtonPressed(
-      GetHistoryButtonPressed event, Emitter<HistoryState> emit) async {
-    print(
-        'Menerima event GetHistoryButtonPressed dengan ID Pegawai: ${event.idPegawai}');
+    GetHistoryButtonPressed event,
+    Emitter<HistoryState> emit,
+  ) async {
+    emit(HistoryLoading());
 
     try {
-      emit(HistoryLoading()); // Menampilkan loading saat mengambil data
-      final absensiList = await _getHistoryUseCase.execute(event.idPegawai);
+      final prefs = await SharedPreferences.getInstance();
+      final idPegawai = prefs.getInt('id_pegawai') ?? 0;
 
-      print('Data history berhasil dimuat: ${absensiList.length} item');
+      if (idPegawai == 0) {
+        emit(HistoryFailure("Id Pegawai not found."));
+        return;
+      }
 
-      emit(HistoryLoaded(absensiList: absensiList)); // Data berhasil dimuat
+      // Fetch user data
+      final history = await getHistoryUseCase.execute(idPegawai);
+
+      emit(HistorySuccess(
+        history: history,
+      ));
     } catch (e) {
-      print('Error saat mengambil data history: $e');
-      emit(HistoryFailure(errorMessage: e.toString())); // Menangani error
+      emit(HistoryFailure("Error fetching data: ${e.toString()}"));
     }
   }
 }

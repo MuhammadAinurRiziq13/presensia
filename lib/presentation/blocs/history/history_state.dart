@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:presensia/domain/entities/absensi.dart';
 
 abstract class HistoryState extends Equatable {
-  const HistoryState();
   @override
   List<Object?> get props => [];
 }
@@ -11,21 +10,21 @@ class HistoryInitial extends HistoryState {}
 
 class HistoryLoading extends HistoryState {}
 
-class HistoryLoaded extends HistoryState {
-  final List<AbsensiEntity> absensiList;
+class HistorySuccess extends HistoryState {
+  final List<AbsensiEntity> history;
 
-  var pegawai;
-
-  HistoryLoaded({required this.absensiList});
+  HistorySuccess({
+    required this.history,
+  });
 
   @override
-  List<Object?> get props => [absensiList];
+  List<Object?> get props => [history];
 }
 
 class HistoryFailure extends HistoryState {
   final String errorMessage;
 
-  HistoryFailure({required this.errorMessage});
+  HistoryFailure(this.errorMessage);
 
   @override
   List<Object?> get props => [errorMessage];
