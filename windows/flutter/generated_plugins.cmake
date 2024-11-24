@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  dio_interceptor_plus
   file_selector_windows
 )
 

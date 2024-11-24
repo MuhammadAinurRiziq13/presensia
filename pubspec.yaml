@@ -30,15 +30,24 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  table_calendar: ^3.0.0
-  intl: ^0.17.0  # Atau versi terbaru dari intl
-
+  table_calendar: ^3.0.9
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   image_picker: ^1.1.2
   slide_to_act: ^2.0.2
+  bloc: ^8.1.4
+  flutter_bloc: ^8.1.6
+  dio_interceptor_plus: ^0.0.2
+  equatable: ^2.0.5
+  dio: ^5.7.0
+  shared_preferences: ^2.3.3
+  another_flushbar: ^1.12.30
+  go_router: ^14.6.0
+  shimmer: ^3.0.0
+  intl: ^0.19.0
+  postgres: ^3.4.3
 
 dev_dependencies:
   flutter_test:
