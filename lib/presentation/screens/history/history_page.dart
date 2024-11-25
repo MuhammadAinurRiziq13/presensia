@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
 import '../../blocs/history/history_bloc.dart';
 import '../../blocs/history/history_state.dart';
 import '../../blocs/history/history_event.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:intl/intl.dart';
 import '../../../presentation/widgets/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:presensia/domain/entities/absensi.dart';
+import 'package:table_calendar/table_calendar.dart';
+
+extension DateExtensions on DateTime {
+  bool isSameDate(DateTime? other) {
+    if (other == null) return false;
+    return year == other.year && month == other.month && day == other.day;
+  }
+}
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -18,15 +26,34 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
+  DateTime? _startDate;
+  DateTime? _endDate;
+  DateTime _focusedDate = DateTime.now();
+
   @override
   void initState() {
     super.initState();
     _fetchHistoryData();
+    _focusedDate = DateTime.now();
   }
 
-  void _fetchHistoryData() async {
-    context.read<HistoryBloc>().add(GetHistoryButtonPressed(
-        idPegawai: 1)); // Replace with actual ID if needed
+  void _fetchHistoryData() {
+    // ID pegawai sementara dibuat statis.
+    context.read<HistoryBloc>().add(GetHistoryButtonPressed(idPegawai: 1));
+  }
+
+  List<AbsensiEntity> _filterHistoryByDate(List<AbsensiEntity> history) {
+    if (_startDate == null && _endDate == null) return history;
+
+    return history.where((attendance) {
+      if (attendance.tanggal == null) return false;
+
+      final tanggal = attendance.tanggal!;
+      if (_startDate != null && tanggal.isBefore(_startDate!)) return false;
+      if (_endDate != null && tanggal.isAfter(_endDate!)) return false;
+
+      return true;
+    }).toList();
   }
 
   @override
@@ -44,7 +71,7 @@ class _HistoryPageState extends State<HistoryPage> {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
-            _fetchHistoryData(); // Fetch data again on pull to refresh
+            _fetchHistoryData();
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -52,6 +79,8 @@ class _HistoryPageState extends State<HistoryPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 20),
+                _buildCalendarFilter(),
                 const SizedBox(height: 20),
                 BlocBuilder<HistoryBloc, HistoryState>(
                   builder: (context, state) {
@@ -65,7 +94,12 @@ class _HistoryPageState extends State<HistoryPage> {
                         ),
                       );
                     } else if (state is HistorySuccess) {
-                      return _buildHistoryTable(state.history);
+                      final filteredHistory =
+                          _filterHistoryByDate(state.history);
+                      return filteredHistory.isNotEmpty
+                          ? _buildHistoryTable(filteredHistory)
+                          : const Center(
+                              child: Text("Tidak ada data ditemukan."));
                     } else if (state is HistoryFailure) {
                       return Center(
                         child: Text(
@@ -82,6 +116,41 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
         ),
       ),
+      bottomNavigationBar: const BottomNavigationWidget(
+        currentIndex: 1,
+      ),
+    );
+  }
+
+  Widget _buildCalendarFilter() {
+    return TableCalendar(
+      firstDay: DateTime(2000),
+      lastDay: DateTime.now(),
+      focusedDay:
+          _focusedDate ?? DateTime.now(), // Fallback jika _focusedDate null
+      selectedDayPredicate: (day) {
+        if (_startDate == null && _endDate == null) return false;
+        return (_startDate != null && day.isSameDate(_startDate)) ||
+            (_endDate != null && day.isSameDate(_endDate));
+      },
+      onDaySelected: (selectedDay, focusedDay) {
+        setState(() {
+          _focusedDate = focusedDay; // Pastikan tidak null
+          if (_startDate == null || (_startDate != null && _endDate != null)) {
+            _startDate = selectedDay;
+            _endDate = null;
+          } else {
+            if (selectedDay.isBefore(_startDate!)) {
+              _endDate = _startDate;
+              _startDate = selectedDay;
+            } else {
+              _endDate = selectedDay;
+            }
+          }
+        });
+      },
+      calendarFormat: CalendarFormat.month,
+      availableCalendarFormats: const {CalendarFormat.month: 'Month'},
     );
   }
 
@@ -96,7 +165,6 @@ class _HistoryPageState extends State<HistoryPage> {
             DataColumn(label: Text('Status')),
           ],
           rows: history.map((attendance) {
-            // Format Tanggal
             String formattedDate = '';
             if (attendance.tanggal != null) {
               try {
@@ -107,12 +175,10 @@ class _HistoryPageState extends State<HistoryPage> {
               }
             }
 
-            // Handle waktuMasuk and waktuKeluar (ensure they are String)
             String formattedMasuk = attendance.waktuMasuk?.toString() ?? '---';
             String formattedKeluar =
                 attendance.waktuKeluar?.toString() ?? '---';
 
-            // Handle statusAbsen
             String statusAbsen = attendance.statusAbsen ?? '---';
 
             return DataRow(cells: [
@@ -127,7 +193,6 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
-  // Skeleton for loading
   Widget _buildLoadingRow() {
     return Row(
       children: [
