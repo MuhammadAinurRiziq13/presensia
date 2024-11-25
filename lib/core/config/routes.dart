@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:presensia/domain/usecases/update_waktu_keluar_usecase.dart';
 import 'package:presensia/data/repositories/history_repository_impl.dart';
 import 'package:presensia/data/repositories/auth_repository_impl.dart';
 import 'package:presensia/data/repositories/home_repository_impl.dart';
@@ -81,7 +82,7 @@ class AppRoutes {
         },
       ),
 
-      // Route Home
+      // Home Route
       GoRoute(
         path: '/home',
         builder: (context, state) {
@@ -104,7 +105,23 @@ class AppRoutes {
         },
       ),
 
-      // Route History
+      // Presensi Route
+      GoRoute(
+        path: '/presensi',
+        builder: (context, state) {
+          final presensiApiDataSource = PresensiApiDataSource(dioClient);
+          final presensiRepository =
+              PresensiRepositoryImpl(presensiApiDataSource);
+          final storePresensiUseCase = StorePresensiUseCase(presensiRepository);
+
+          return BlocProvider(
+            create: (_) => PresensiBloc(storePresensiUseCase),
+            child: const PresensiPage(),
+          );
+        },
+      ),
+
+      // History Route
       GoRoute(
         path: '/history',
         builder: (context, state) {
