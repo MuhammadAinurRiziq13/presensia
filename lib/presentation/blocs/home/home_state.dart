@@ -15,15 +15,19 @@ class AttendanceAndUserSuccess extends AttendanceState {
   final PegawaiEntity user;
   final List<AttendanceEntity> attendance;
   final String currentDate;
+  final int sisaWfa; // Tidak nullable
+  final int sisaCuti; // Tidak nullable
 
   AttendanceAndUserSuccess({
     required this.user,
     required this.attendance,
     required this.currentDate,
+    required this.sisaWfa, // Harus required
+    required this.sisaCuti, // Harus required
   });
 
   @override
-  List<Object?> get props => [user, attendance, currentDate];
+  List<Object?> get props => [user, attendance, currentDate, sisaWfa, sisaCuti];
 }
 
 class AttendanceFailure extends AttendanceState {
@@ -33,4 +37,13 @@ class AttendanceFailure extends AttendanceState {
 
   @override
   List<Object?> get props => [errorMessage];
+}
+
+class AttendanceUpdateSuccess extends AttendanceState {
+  final AttendanceEntity attendance;
+
+  AttendanceUpdateSuccess({required this.attendance});
+
+  @override
+  List<Object?> get props => [attendance];
 }

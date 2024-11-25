@@ -8,6 +8,7 @@ import '../../blocs/home/home_state.dart';
 import '../../blocs/home/home_event.dart';
 import '../../../presentation/widgets/bottom_navigation.dart';
 import 'package:go_router/go_router.dart';
+import 'package:slide_to_act/slide_to_act.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,10 +18,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool _showSlideButton = false;
+
   @override
   void initState() {
     super.initState();
     _checkLoginStatus();
+    _checkPresentStatus();
     _fetchAllData();
   }
 
@@ -37,6 +41,17 @@ class _HomePageState extends State<HomePage> {
       showSuccessFlushbar(
           context, 'Login berhasil! Selamat datang di aplikasi!');
       prefs.setBool('isLogined', false);
+    }
+  }
+
+  void _checkPresentStatus() async {
+    // Memeriksa status login dari SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    bool? isPresent = prefs.getBool('isPresent') ?? false;
+
+    if (isPresent) {
+      showSuccessFlushbar(context, 'Presensi berhasil !!');
+      prefs.setBool('isPresent', false);
     }
   }
 
@@ -180,6 +195,8 @@ class _HomePageState extends State<HomePage> {
                           return Column(
                             children: [
                               _buildSkeleton(),
+                              const SizedBox(height: 20),
+                              _buildSkeleton(),
                             ],
                           );
                         } else if (state is AttendanceAndUserSuccess) {
@@ -251,28 +268,116 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 20),
+                // Daily Presence Section
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Presensi Tahun ini',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    const SizedBox(height: 8),
+                    BlocBuilder<AttendanceBloc, AttendanceState>(
+                      builder: (context, state) {
+                        if (state is AttendanceLoading) {
+                          // Show shimmer loading skeleton
+                          return Column(
+                            children: [
+                              _buildSkeleton(),
+                            ],
+                          );
+                        } else if (state is AttendanceAndUserSuccess) {
+                          final sisaWfa = state.sisaWfa.toString();
+                          final sisaCuti = state.sisaCuti.toString();
+
+                          return Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildPresenceCard(
+                                      'Jatah WFA',
+                                      '$sisaWfa Hari',
+                                      Icons.home,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: _buildPresenceCard(
+                                      'Jatah Cuti',
+                                      '$sisaCuti Hari',
+                                      Icons.calendar_today,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          );
+                        } else if (state is AttendanceFailure) {
+                          return Center(
+                            child: Text(
+                              state.errorMessage,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          );
+                        }
+                        return Container(); // Return empty container if no state is loaded
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 25),
+                BlocBuilder<AttendanceBloc, AttendanceState>(
+                  builder: (context, state) {
+                    if (state is AttendanceAndUserSuccess &&
+                        state.attendance.isNotEmpty &&
+                        state.attendance[0].waktuKeluar == null) {
+                      // Jika waktuKeluar masih null, tampilkan SliderButton
+                      return _buildSliderButton();
+                    }
+                    return const SizedBox();
+                  },
+                ),
               ],
             ),
           ),
         ),
       ),
-      floatingActionButton: SizedBox(
-        width: 65.0,
-        height: 65.0,
-        child: FloatingActionButton(
-          onPressed: () {
-            // Navigasi ke halaman presensi
-            GoRouter.of(context).go('/presensi');
-          },
-          backgroundColor: Colors.blue,
-          shape: const CircleBorder(),
-          child: const Icon(
-            Icons.camera_alt,
-            size: 35.0, // Ukuran ikon lebih besar
-            color: Colors.white,
-          ),
-          heroTag: 'fab-home', // Tag unik untuk FAB di halaman ini
-        ),
+      floatingActionButton: BlocBuilder<AttendanceBloc, AttendanceState>(
+        builder: (context, state) {
+          // Periksa apakah state berhasil dan variabel statusAbsen tidak null
+          String? statusAbsen;
+          if (state is AttendanceAndUserSuccess) {
+            statusAbsen = state.attendance.isNotEmpty
+                ? state.attendance[0].statusAbsen
+                : null;
+          }
+
+          // Mengatur ikon dan properti FAB berdasarkan kondisi
+          final isDisabled = statusAbsen != null;
+
+          return SizedBox(
+            width: 65.0,
+            height: 65.0,
+            child: FloatingActionButton(
+              onPressed: isDisabled
+                  ? null
+                  : () {
+                      GoRouter.of(context).go('/presensi');
+                    },
+              backgroundColor: isDisabled ? Colors.green : Colors.blue,
+              shape: const CircleBorder(),
+              child: Icon(
+                isDisabled ? Icons.check_circle : Icons.camera_alt,
+                size: 35.0,
+                color: Colors.white,
+              ),
+              heroTag: 'fab-home', // Tag unik untuk FAB di halaman ini
+            ),
+          );
+        },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: const BottomNavigationWidget(
@@ -316,7 +421,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Skeleton for each of the cards
   Widget _buildSkeleton() {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
@@ -328,40 +432,17 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: Container(
                   height: 120,
+                  margin: const EdgeInsets.only(right: 8),
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
               Expanded(
                 child: Container(
                   height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Container(
-                  height: 120,
+                  margin: const EdgeInsets.only(left: 8),
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(10),
@@ -372,6 +453,41 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSliderButton() {
+    return BlocConsumer<AttendanceBloc, AttendanceState>(
+      listener: (context, state) {
+        if (state is AttendanceUpdateSuccess) {
+          // Jika update berhasil, panggil FetchAllDataEvent
+          _fetchAllData();
+
+          // Tampilkan pesan sukses
+          showSuccessFlushbar(context, 'Berhasil keluar !! Silahkan Istirahat');
+        } else if (state is AttendanceFailure) {
+          // Tampilkan pesan error jika gagal
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.errorMessage)),
+          );
+        }
+      },
+      builder: (context, state) {
+        return SlideAction(
+          onSubmit: () {
+            // Panggil event UpdateWaktuKeluarEvent
+            context.read<AttendanceBloc>().add(UpdateWaktuKeluarEvent());
+          },
+          text: 'Geser untuk keluar',
+          textStyle: const TextStyle(fontSize: 14, color: Colors.white),
+          sliderButtonIcon:
+              const Icon(Icons.arrow_forward, color: Colors.red, size: 20),
+          innerColor: Colors.white,
+          outerColor: Colors.red,
+          height: 65,
+          borderRadius: 10,
+        );
+      },
     );
   }
 }

@@ -8,7 +8,7 @@ class AttendanceEntity extends Equatable {
   final String statusAbsen;
   final String lokasiAbsen;
   final String? fotoAbsen;
-  final DateTime tanggal;
+  final DateTime? tanggal;
   final DateTime? waktuMasuk;
   final DateTime? waktuKeluar;
 
@@ -18,7 +18,7 @@ class AttendanceEntity extends Equatable {
     required this.statusAbsen,
     required this.lokasiAbsen,
     this.fotoAbsen,
-    required this.tanggal,
+    this.tanggal,
     this.waktuMasuk,
     this.waktuKeluar,
   });
