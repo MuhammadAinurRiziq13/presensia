@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shimmer/shimmer.dart'; // Import shimmer package
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:go_router/go_router.dart';
+import '../../../presentation/blocs/home/home_bloc.dart';
+import '../../../presentation/blocs/home/home_event.dart';
+import '../../../presentation/blocs/home/home_state.dart';
+import '../../widgets/bottom_navigation.dart';
 import '../../../core/utils/flushbar_helper.dart';
 import '../../blocs/home/home_bloc.dart';
 import '../../blocs/home/home_state.dart';
@@ -11,10 +16,10 @@ import 'package:go_router/go_router.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -28,14 +33,13 @@ class _HomePageState extends State<HomePage> {
     _fetchAllData();
   }
 
-  void _fetchAllData() async {
+  void _fetchAllData() {
     context.read<AttendanceBloc>().add(FetchAllDataEvent());
   }
 
-  void _checkLoginStatus() async {
-    // Memeriksa status login dari SharedPreferences
+  Future<void> _checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
-    bool? isLogined = prefs.getBool('isLogined') ?? false;
+    final isLogined = prefs.getBool('isLogined') ?? false;
 
     if (isLogined) {
       showSuccessFlushbar(
@@ -61,11 +65,10 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
-            _fetchAllData(); // Memanggil ulang data saat layar ditarik
+            _fetchAllData();
           },
           child: SingleChildScrollView(
-            physics:
-                const AlwaysScrollableScrollPhysics(), // Agar tetap bisa scroll meski datanya sedikit
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,33 +391,14 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildPresenceCard(String title, String time, IconData icon) {
     return Card(
-      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 177, 216, 248),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, color: Colors.blue, size: 20),
-                ),
-                const SizedBox(width: 8),
-                Expanded(child: Text(title)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              time, // This will display either time or "---"
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+            Icon(icon, color: Colors.blue),
+            const SizedBox(width: 8),
+            Text('$title: $time'),
           ],
         ),
       ),

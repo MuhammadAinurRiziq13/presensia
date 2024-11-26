@@ -42,18 +42,13 @@ class _HistoryPageState extends State<HistoryPage> {
     context.read<HistoryBloc>().add(GetHistoryButtonPressed(idPegawai: 1));
   }
 
-  List<AbsensiEntity> _filterHistoryByDate(List<AbsensiEntity> history) {
-    if (_startDate == null && _endDate == null) return history;
-
-    return history.where((attendance) {
-      if (attendance.tanggal == null) return false;
-
-      final tanggal = attendance.tanggal!;
-      if (_startDate != null && tanggal.isBefore(_startDate!)) return false;
-      if (_endDate != null && tanggal.isAfter(_endDate!)) return false;
-
-      return true;
-    }).toList();
+  List<AbsensiEntity> _filterHistoryBySelectedDate(
+      List<AbsensiEntity> history, DateTime? selectedDate) {
+    if (selectedDate == null) return [];
+    return history
+        .where((attendance) =>
+            attendance.tanggal?.isSameDate(selectedDate) ?? false)
+        .toList();
   }
 
   @override
@@ -94,12 +89,14 @@ class _HistoryPageState extends State<HistoryPage> {
                         ),
                       );
                     } else if (state is HistorySuccess) {
-                      final filteredHistory =
-                          _filterHistoryByDate(state.history);
+                      final filteredHistory = _filterHistoryBySelectedDate(
+                          state.history, _startDate);
                       return filteredHistory.isNotEmpty
                           ? _buildHistoryTable(filteredHistory)
                           : const Center(
-                              child: Text("Tidak ada data ditemukan."));
+                              child:
+                                  Text("Tidak ada Absensi untuk tanggal ini."),
+                            );
                     } else if (state is HistoryFailure) {
                       return Center(
                         child: Text(
@@ -124,33 +121,34 @@ class _HistoryPageState extends State<HistoryPage> {
 
   Widget _buildCalendarFilter() {
     return TableCalendar(
-      firstDay: DateTime(2000),
-      lastDay: DateTime.now(),
-      focusedDay:
-          _focusedDate ?? DateTime.now(), // Fallback jika _focusedDate null
-      selectedDayPredicate: (day) {
-        if (_startDate == null && _endDate == null) return false;
-        return (_startDate != null && day.isSameDate(_startDate)) ||
-            (_endDate != null && day.isSameDate(_endDate));
-      },
+      firstDay: DateTime.utc(2020, 1, 1),
+      lastDay: DateTime.utc(2030, 12, 31),
+      focusedDay: _focusedDate,
+      selectedDayPredicate: (day) => _startDate?.isSameDate(day) ?? false,
       onDaySelected: (selectedDay, focusedDay) {
         setState(() {
-          _focusedDate = focusedDay; // Pastikan tidak null
-          if (_startDate == null || (_startDate != null && _endDate != null)) {
-            _startDate = selectedDay;
-            _endDate = null;
-          } else {
-            if (selectedDay.isBefore(_startDate!)) {
-              _endDate = _startDate;
-              _startDate = selectedDay;
-            } else {
-              _endDate = selectedDay;
-            }
-          }
+          _focusedDate = focusedDay;
+          _startDate = selectedDay; // Simpan tanggal yang dipilih
         });
       },
-      calendarFormat: CalendarFormat.month,
-      availableCalendarFormats: const {CalendarFormat.month: 'Month'},
+      calendarStyle: const CalendarStyle(
+        todayDecoration: BoxDecoration(
+          color: Colors.blue,
+          shape: BoxShape.circle,
+        ),
+        selectedDecoration: BoxDecoration(
+          color: Colors.orange,
+          shape: BoxShape.circle,
+        ),
+        weekendTextStyle: TextStyle(color: Colors.red),
+        outsideDaysVisible: false,
+      ),
+      headerStyle: const HeaderStyle(
+        formatButtonVisible: false,
+        titleCentered: true,
+        titleTextStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      ),
+      startingDayOfWeek: StartingDayOfWeek.monday,
     );
   }
 
@@ -213,191 +211,3 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-// import 'package:flutter/material.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:presensia/presentation/blocs/history/history_bloc.dart';
-// import 'package:presensia/presentation/blocs/history/history_event.dart';
-// import 'package:presensia/presentation/blocs/history/history_state.dart';
-// import 'package:table_calendar/table_calendar.dart';
-// import '../../../presentation/widgets/bottom_navigation.dart';
-
-// class HistoryPage extends StatefulWidget {
-//   const HistoryPage({super.key});
-
-//   @override
-//   _HistoryPageState createState() => _HistoryPageState();
-// }
-
-// class _HistoryPageState extends State<HistoryPage> {
-//   DateTime selectedDate = DateTime.now();
-//   bool isLoadingIdPegawai = true; // Flag untuk loading ID Pegawai
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _loadIdPegawai(); // Memuat ID pegawai saat initState
-//   }
-
-//   Future<void> _loadIdPegawai() async {
-//     final prefs = await SharedPreferences.getInstance();
-//     final idPegawai = prefs.getInt('id_pegawai');
-
-//     if (idPegawai != null) {
-//       BlocProvider.of<HistoryBloc>(context)
-//           .add(GetHistoryButtonPressed(idPegawai: idPegawai));
-//     } else {
-//       Future.delayed(Duration.zero, () {
-//         if (mounted) {
-//           ScaffoldMessenger.of(context).showSnackBar(
-//             const SnackBar(content: Text('ID Pegawai tidak ditemukan')),
-//           );
-//         }
-//       });
-//     }
-
-//     setState(() {
-//       isLoadingIdPegawai = false; // Set loading ke false setelah pemrosesan
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text(
-//           'Riwayat Presensi',
-//           style: TextStyle(color: Colors.black),
-//         ),
-//         backgroundColor: Colors.white,
-//         elevation: 0,
-//         centerTitle: true,
-//         iconTheme: const IconThemeData(color: Colors.black),
-//       ),
-//       body: isLoadingIdPegawai
-//           ? const Center(child: CircularProgressIndicator())
-//           : _buildHistoryContent(),
-//       bottomNavigationBar: const BottomNavigationWidget(
-//         currentIndex: 1,
-//       ),
-//     );
-//   }
-
-//   Widget _buildHistoryContent() {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         _buildCalendar(),
-//         const SizedBox(height: 16.0),
-//         const Padding(
-//           padding: EdgeInsets.symmetric(horizontal: 16.0),
-//           child: Text(
-//             'Presensi Anda',
-//             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//           ),
-//         ),
-//         const SizedBox(height: 16.0),
-//         Expanded(child: _buildHistoryList()),
-//       ],
-//     );
-//   }
-
-//   Widget _buildCalendar() {
-//     return TableCalendar(
-//       firstDay: DateTime.utc(2020, 1, 1),
-//       lastDay: DateTime.utc(2030, 12, 31),
-//       focusedDay: selectedDate,
-//       selectedDayPredicate: (day) => isSameDay(selectedDate, day),
-//       onDaySelected: (selectedDay, focusedDay) {
-//         setState(() {
-//           selectedDate = selectedDay;
-//         });
-//       },
-//       calendarStyle: const CalendarStyle(
-//         todayDecoration: BoxDecoration(
-//           color: Colors.blue,
-//           shape: BoxShape.circle,
-//         ),
-//         selectedDecoration: BoxDecoration(
-//           color: Colors.orange,
-//           shape: BoxShape.circle,
-//         ),
-//       ),
-//       headerStyle: const HeaderStyle(
-//         formatButtonVisible: false,
-//         titleCentered: true,
-//         titleTextStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-//       ),
-//       startingDayOfWeek: StartingDayOfWeek.monday,
-//     );
-//   }
-
-//   Widget _buildAttendanceList() {
-//     return BlocBuilder<HistoryBloc, HistoryState>(
-//       builder: (context, state) {
-//         if (state is HistoryLoading) {
-//           return const Center(child: CircularProgressIndicator());
-//         } else if (state is HistorySuccess) {
-//           return _buildHistoryListView(state.history);
-//         } else if (state is HistoryFailure) {
-//           return Center(
-//             child: Text(
-//               'Error: ${state.errorMessage}',
-//               style: const TextStyle(color: Colors.red),
-//               textAlign: TextAlign.center,
-//             ),
-//           );
-//         } else {
-//           return const Center(
-//             child: Text('Tidak ada data presensi.'),
-//           );
-//         }
-//       },
-//     );
-//   }
-
-//   Widget _buildHistoryListView(List<AbsensiEntity> history) {
-//     final selectedDayData = history.where((item) {
-//       return isSameDay(item.tanggal, selectedDate);
-//     }).toList();
-
-//     if (selectedDayData.isEmpty) {
-//       return const Center(
-//         child: Text("Tidak ada absensi untuk tanggal ini."),
-//       );
-//     }
-
-//     return ListView.builder(
-//       itemCount: selectedDayData.length,
-//       itemBuilder: (context, index) {
-//         final item = selectedDayData[index];
-//         return ListTile(
-//           title: Text('Status: ${item.statusAbsen}'),
-//           subtitle: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               Text(
-//                 'Waktu Masuk: ${item.waktuMasuk?.hour ?? '--'}:${item.waktuMasuk?.minute ?? '--'}',
-//               ),
-//               Text(
-//                 'Waktu Keluar: ${item.waktuKeluar?.hour ?? '--'}:${item.waktuKeluar?.minute ?? '--'}',
-//               ),
-//               Text('Lokasi: ${item.lokasiAbsen ?? "Tidak tersedia"}'),
-//             ],
-//           ),
-//         );
-//       },
-//     );
-//   }
-// }
