@@ -46,4 +46,15 @@ class AuthRepositoryImpl implements AuthRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> logout() async {
+    try {
+      await _authApiDataSource.logout();
+      print('Logout success');
+    } catch (e) {
+      print('Logout failed: ${e.toString()}');
+      rethrow;
+    }
+  }
 }

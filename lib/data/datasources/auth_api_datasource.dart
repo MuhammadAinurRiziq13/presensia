@@ -64,16 +64,26 @@ class AuthApiDataSource {
     }
   }
 
-  /// Logout (hapus token dari SharedPreferences)
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token');
-  }
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-  /// Check jika pengguna sudah login
-  Future<bool> isLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-    return token != null && token.isNotEmpty;
+      // Hapus semua data di SharedPreferences
+      await prefs.clear();
+    } catch (e) {
+      throw Exception('Failed to logout: ${e.toString()}');
+    }
   }
 }
+  // /// Logout (hapus token dari SharedPreferences)
+  // Future<void> logout() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   await prefs.remove('auth_token');
+  // }
+
+  // /// Check jika pengguna sudah login
+  // Future<bool> isLoggedIn() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final token = prefs.getString('auth_token');
+  //   return token != null && token.isNotEmpty;
+  // }

@@ -12,4 +12,6 @@ abstract class AuthRepository {
     required String noPegawai,
     required String password,
   });
+
+  Future<void> logout();
 }

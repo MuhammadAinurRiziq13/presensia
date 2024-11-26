@@ -13,6 +13,7 @@ import 'package:presensia/presentation/screens/login/login.dart';
 import 'package:presensia/presentation/screens/register/register.dart';
 import 'package:presensia/presentation/screens/splash_screen/splash_screen.dart';
 import 'package:presensia/presentation/screens/profile/profile_page.dart';
+import 'package:presensia/presentation/screens/profile/profile_detail_page.dart';
 import 'package:presensia/presentation/screens/permit/permit_page.dart';
 import 'package:presensia/presentation/screens/history/history_page.dart';
 import 'package:presensia/presentation/screens/presensi/presensi_page.dart';
@@ -30,9 +31,15 @@ import 'package:presensia/domain/usecases/get_today_attendance_usecase.dart';
 import 'package:presensia/domain/usecases/get_user_usecase.dart';
 import 'package:presensia/domain/usecases/get_quota_usecase.dart';
 import 'package:presensia/domain/usecases/store_presensi_usecase.dart';
+import 'package:presensia/domain/usecases/logout_usecase.dart';
+import 'package:presensia/domain/usecases/change_password_usecase.dart';
 import 'package:presensia/data/repositories/presensi_repository_impl.dart';
+import 'package:presensia/data/repositories/profile_repository_impl.dart';
 import 'package:presensia/data/datasources/presensi_api_datasource.dart';
+import 'package:presensia/data/datasources/profile_api_datasource.dart';
 import 'package:presensia/presentation/blocs/presensi/presensi_bloc.dart';
+import 'package:presensia/presentation/blocs/profile/profile_bloc.dart';
+import 'package:presensia/presentation/blocs/profile/profile_detail_bloc.dart';
 
 class AppRoutes {
   static final DioClient dioClient = DioClient(baseUrl: Constants.baseUrl);
@@ -148,7 +155,43 @@ class AppRoutes {
       // Profile Route
       GoRoute(
         path: '/profile',
-        builder: (context, state) => const ProfilePage(),
+        builder: (context, state) {
+          final profileApiDataSource = AttendanceApiDataSource(dioClient);
+          final profileRepository =
+              AttendanceRepositoryImpl(profileApiDataSource);
+          final authApiDataSource = AuthApiDataSource(dioClient);
+          final authRepositoryImpl = AuthRepositoryImpl(authApiDataSource);
+          final getUserUseCase = GetUserUseCase(profileRepository);
+          final logoutUseCase = LogoutUseCase(authRepositoryImpl);
+
+          return BlocProvider(
+            create: (_) => ProfileBloc(getUserUseCase, logoutUseCase),
+            child: const ProfilePage(),
+          );
+        },
+      ),
+
+      GoRoute(
+        path: '/profile/detail',
+        builder: (context, state) {
+          final profileApiDataSource = AttendanceApiDataSource(dioClient);
+
+          final profileRepository =
+              AttendanceRepositoryImpl(profileApiDataSource);
+          final getUserUseCase = GetUserUseCase(profileRepository);
+
+          final profileDetailDataSource = ProfileApiDataSource(dioClient);
+          final profileDetailRepository =
+              ProfileRepositoryImpl(profileDetailDataSource);
+          final changePasswordUseCase =
+              ChangePasswordUseCase(profileDetailRepository);
+
+          return BlocProvider(
+            create: (_) =>
+                ProfileDetailBloc(getUserUseCase, changePasswordUseCase),
+            child: const ProfileDetailPage(),
+          );
+        },
       ),
     ],
 
