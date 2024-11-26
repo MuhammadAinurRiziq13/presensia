@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:presensia/domain/usecases/update_waktu_keluar_usecase.dart';
 import 'package:presensia/data/repositories/history_repository_impl.dart';
 import 'package:presensia/data/repositories/auth_repository_impl.dart';
 import 'package:presensia/data/repositories/home_repository_impl.dart';
@@ -27,6 +28,11 @@ import 'package:presensia/domain/usecases/register_usecase.dart';
 import 'package:presensia/domain/usecases/login_usecase.dart';
 import 'package:presensia/domain/usecases/get_today_attendance_usecase.dart';
 import 'package:presensia/domain/usecases/get_user_usecase.dart';
+import 'package:presensia/domain/usecases/get_quota_usecase.dart';
+import 'package:presensia/domain/usecases/store_presensi_usecase.dart';
+import 'package:presensia/data/repositories/presensi_repository_impl.dart';
+import 'package:presensia/data/datasources/presensi_api_datasource.dart';
+import 'package:presensia/presentation/blocs/presensi/presensi_bloc.dart';
 
 class AppRoutes {
   static final DioClient dioClient = DioClient(baseUrl: Constants.baseUrl);
@@ -76,31 +82,46 @@ class AppRoutes {
         },
       ),
 
-      // Route Home
+      // Home Route
       GoRoute(
         path: '/home',
         builder: (context, state) {
-          // Inisialisasi datasource, repository, dan use cases
           final attendanceApiDataSource = AttendanceApiDataSource(dioClient);
           final attendanceRepository =
               AttendanceRepositoryImpl(attendanceApiDataSource);
           final getTodaysAttendanceUseCase =
               GetTodaysAttendanceUseCase(attendanceRepository);
-          final getUserUseCase = GetUserUseCase(
-              attendanceRepository); // Use case baru untuk getUser
+          final getUserUseCase = GetUserUseCase(attendanceRepository);
+          final getQuotaUseCase =
+              GetRemainingQuotaUseCase(attendanceRepository);
+          final updateWaktuKeluarUseCase =
+              UpdateWaktuKeluarUseCase(attendanceRepository);
 
-          // Inisialisasi Bloc dengan dua use cases
           return BlocProvider(
-            create: (_) => AttendanceBloc(
-              getTodaysAttendanceUseCase,
-              getUserUseCase,
-            ),
+            create: (_) => AttendanceBloc(getTodaysAttendanceUseCase,
+                getUserUseCase, getQuotaUseCase, updateWaktuKeluarUseCase),
             child: const HomePage(),
           );
         },
       ),
 
-      // Route History
+      // Presensi Route
+      GoRoute(
+        path: '/presensi',
+        builder: (context, state) {
+          final presensiApiDataSource = PresensiApiDataSource(dioClient);
+          final presensiRepository =
+              PresensiRepositoryImpl(presensiApiDataSource);
+          final storePresensiUseCase = StorePresensiUseCase(presensiRepository);
+
+          return BlocProvider(
+            create: (_) => PresensiBloc(storePresensiUseCase),
+            child: const PresensiPage(),
+          );
+        },
+      ),
+
+      // History Route
       GoRoute(
         path: '/history',
         builder: (context, state) {
@@ -128,12 +149,6 @@ class AppRoutes {
       GoRoute(
         path: '/profile',
         builder: (context, state) => const ProfilePage(),
-      ),
-
-      // Presensi Route
-      GoRoute(
-        path: '/presensi',
-        builder: (context, state) => const PresensiPage(),
       ),
     ],
 
