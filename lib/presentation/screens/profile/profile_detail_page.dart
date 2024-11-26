@@ -43,7 +43,10 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F7FA),
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon:
               const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
@@ -51,30 +54,60 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
         ),
         title: Text(
           'Profil Saya',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+            fontSize: 20,
+          ),
         ),
         centerTitle: true,
-        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildProfileDetails(),
-              const SizedBox(height: 20),
-              const Divider(),
-              const SizedBox(height: 20),
-              const Text(
-                'Ubah Password',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              _buildChangePasswordForm(),
-            ],
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                _buildProfileDetails(),
+                const SizedBox(height: 30),
+                _buildChangePasswordSection(),
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChangePasswordSection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.shade100.withOpacity(0.5),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Ubah Password',
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue),
+            ),
+            const SizedBox(height: 20),
+            _buildChangePasswordForm(),
+          ],
         ),
       ),
     );
@@ -114,68 +147,100 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
         final isLoading = state is ProfilePasswordLoading;
         return Column(
           children: [
-            TextField(
+            _buildPasswordTextField(
               controller: _oldPasswordController,
-              obscureText: !_isOldPasswordVisible,
-              decoration: InputDecoration(
-                labelText: 'Password Lama',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isOldPasswordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                  ),
-                  onPressed: () => setState(() {
-                    _isOldPasswordVisible = !_isOldPasswordVisible;
-                  }),
-                ),
-              ),
+              label: 'Password Lama',
+              isVisible: _isOldPasswordVisible,
+              onVisibilityToggle: () => setState(() {
+                _isOldPasswordVisible = !_isOldPasswordVisible;
+              }),
             ),
             const SizedBox(height: 20),
-            TextField(
+            _buildPasswordTextField(
               controller: _newPasswordController,
-              obscureText: !_isNewPasswordVisible,
-              decoration: InputDecoration(
-                labelText: 'Password Baru',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isNewPasswordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                  ),
-                  onPressed: () => setState(() {
-                    _isNewPasswordVisible = !_isNewPasswordVisible;
-                  }),
-                ),
-              ),
+              label: 'Password Baru',
+              isVisible: _isNewPasswordVisible,
+              onVisibilityToggle: () => setState(() {
+                _isNewPasswordVisible = !_isNewPasswordVisible;
+              }),
             ),
             const SizedBox(height: 30),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : _changePassword,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                ),
-                child: isLoading
-                    ? const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      )
-                    : const Text(
-                        'Kirim',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-              ),
-            ),
+            _buildSubmitButton(isLoading),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildPasswordTextField({
+    required TextEditingController controller,
+    required String label,
+    required bool isVisible,
+    required VoidCallback onVisibilityToggle,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: !isVisible,
+      style: TextStyle(color: Colors.black), // Text color set to black
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.blue),
+        filled: true,
+        fillColor: Colors.blue.shade50.withOpacity(0.5),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(color: Colors.blue, width: 2),
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(
+            isVisible ? Icons.visibility : Icons.visibility_off,
+            color: Colors.blue,
+          ),
+          onPressed: onVisibilityToggle,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton(bool isLoading) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.blue,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.shade200,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: isLoading ? null : _changePassword,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+        child: isLoading
+            ? const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              )
+            : Text(
+                'Kirim',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+      ),
     );
   }
 
@@ -185,80 +250,80 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
     required String jabatanPegawai,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            blurRadius: 8,
-            spreadRadius: 2,
+            color: Colors.blue.shade100.withOpacity(0.5),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildProfileDetailRow('Nama Pegawai:', namaPegawai),
-          _buildProfileDetailRow('Nomor Pegawai:', noPegawai),
-          _buildProfileDetailRow('Jabatan Pegawai:', jabatanPegawai),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Detail Profil',
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue),
+            ),
+            const SizedBox(height: 20),
+            _buildProfileDetailRow('Nama Pegawai    :', namaPegawai),
+            _buildProfileDetailRow('Nomor Pegawai   :', noPegawai),
+            _buildProfileDetailRow('Jabatan Pegawai :', jabatanPegawai),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildProfileDetailRow(String title, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
-      child: Column(
+      padding: const EdgeInsets.only(bottom: 15.0),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Text(value, style: const TextStyle(fontSize: 16)),
+          Expanded(
+            flex: 2,
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black, // Text color set to black
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildProfileSkeleton() {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            blurRadius: 8,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSkeletonRow(width: 200, height: 20),
-          const SizedBox(height: 20),
-          _buildSkeletonRow(width: 150, height: 20),
-          const SizedBox(height: 20),
-          _buildSkeletonRow(width: 180, height: 20),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSkeletonRow({required double width, required double height}) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(5),
-      ),
+    return Column(
+      children: [
+        _buildProfileCard(
+          namaPegawai: 'Loading...',
+          noPegawai: 'Loading...',
+          jabatanPegawai: 'Loading...',
+        ),
+      ],
     );
   }
 }
