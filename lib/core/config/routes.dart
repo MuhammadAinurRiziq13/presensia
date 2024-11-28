@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:presensia/domain/usecases/update_waktu_keluar_usecase.dart';
+import 'package:presensia/core/utils/dio_client/dio_client.dart';
+import 'package:presensia/core/utils/constants.dart';
 import 'package:presensia/data/repositories/history_repository_impl.dart';
 import 'package:presensia/data/repositories/auth_repository_impl.dart';
 import 'package:presensia/data/repositories/home_repository_impl.dart';
+import 'package:presensia/data/repositories/presensi_repository_impl.dart';
+import 'package:presensia/data/repositories/profile_repository_impl.dart';
+import 'package:presensia/data/repositories/permit_repository_impl.dart';
 import 'package:presensia/data/datasources/history_api_datasource.dart';
 import 'package:presensia/data/datasources/auth_api_datasource.dart';
 import 'package:presensia/data/datasources/home_api_datasource.dart';
+import 'package:presensia/data/datasources/permit_api_datasource.dart';
+import 'package:presensia/data/datasources/presensi_api_datasource.dart';
+import 'package:presensia/data/datasources/profile_api_datasource.dart';
 import 'package:presensia/presentation/screens/home/home_page.dart';
 import 'package:presensia/presentation/screens/login/login.dart';
 import 'package:presensia/presentation/screens/register/register.dart';
@@ -18,13 +25,17 @@ import 'package:presensia/presentation/screens/permit/permit_page.dart';
 import 'package:presensia/presentation/screens/history/history_page.dart';
 import 'package:presensia/presentation/screens/presensi/presensi_page.dart';
 import 'package:presensia/presentation/screens/app.dart';
-import 'package:presensia/core/utils/dio_client/dio_client.dart';
-import 'package:presensia/core/utils/constants.dart';
 import 'package:presensia/presentation/blocs/register/register_bloc.dart';
 import 'package:presensia/presentation/blocs/login/login_bloc.dart';
 import 'package:presensia/presentation/blocs/history/history_bloc.dart';
 import 'package:presensia/presentation/blocs/home/home_bloc.dart';
+import 'package:presensia/presentation/blocs/permit/permit_bloc.dart';
+import 'package:presensia/presentation/blocs/presensi/presensi_bloc.dart';
+import 'package:presensia/presentation/blocs/profile/profile_bloc.dart';
+import 'package:presensia/presentation/blocs/profile/profile_detail_bloc.dart';
+import 'package:presensia/domain/usecases/update_waktu_keluar_usecase.dart';
 import 'package:presensia/domain/usecases/history_usecase.dart';
+import 'package:presensia/domain/usecases/permit_usecase.dart';
 import 'package:presensia/domain/usecases/register_usecase.dart';
 import 'package:presensia/domain/usecases/login_usecase.dart';
 import 'package:presensia/domain/usecases/get_today_attendance_usecase.dart';
@@ -33,13 +44,6 @@ import 'package:presensia/domain/usecases/get_quota_usecase.dart';
 import 'package:presensia/domain/usecases/store_presensi_usecase.dart';
 import 'package:presensia/domain/usecases/logout_usecase.dart';
 import 'package:presensia/domain/usecases/change_password_usecase.dart';
-import 'package:presensia/data/repositories/presensi_repository_impl.dart';
-import 'package:presensia/data/repositories/profile_repository_impl.dart';
-import 'package:presensia/data/datasources/presensi_api_datasource.dart';
-import 'package:presensia/data/datasources/profile_api_datasource.dart';
-import 'package:presensia/presentation/blocs/presensi/presensi_bloc.dart';
-import 'package:presensia/presentation/blocs/profile/profile_bloc.dart';
-import 'package:presensia/presentation/blocs/profile/profile_detail_bloc.dart';
 
 class AppRoutes {
   static final DioClient dioClient = DioClient(baseUrl: Constants.baseUrl);
@@ -149,8 +153,33 @@ class AppRoutes {
       // Permit Route
       GoRoute(
         path: '/permit',
-        builder: (context, state) => const PermitPage(),
+        builder: (context, state) {
+          // Inisialisasi datasource, repository, dan use cases
+          final permitApiDataSource = PermitApiDataSource(dioClient);
+          final permitRepository = PermitRepositoryImpl(permitApiDataSource);
+          final permitUseCase = PermitUseCase(permitRepository);
+
+          return BlocProvider(
+            create: (_) => PermitBloc(permitUseCase),
+            child: PermitPage(),
+          );
+        },
       ),
+      // Route untuk RiwayatPermitPage (jika ada)
+      // GoRoute(
+      //   path: '/permit/history',
+      //   builder: (context, state) {
+      //     // Inisialisasi datasource, repository, dan use cases untuk riwayat
+      //     final permitApiDataSource = PermitApiDataSource(dioClient);
+      //     final permitRepository = PermitRepositoryImpl(permitApiDataSource);
+      //     final permitUseCase = PermitUseCase(permitRepository);
+
+      //     return BlocProvider(
+      //       create: (_) => PermitBloc(permitUseCase: permitUseCase),
+      //       child: const RiwayatPermitPage(), // Halaman untuk riwayat izin
+      //     );
+      //   },
+      // ),
 
       // Profile Route
       GoRoute(

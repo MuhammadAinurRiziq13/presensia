@@ -1,47 +1,41 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'permit_event.dart';
 import 'permit_state.dart';
-import '../../../data/repositories/permit_repository.dart';
+import 'package:presensia/domain/usecases/permit_usecase.dart';
+import 'package:presensia/domain/entities/permit.dart';
 
 class PermitBloc extends Bloc<PermitEvent, PermitState> {
-  final PermitRepository repository;
+  final PermitUseCase permitUseCase;
 
-  PermitBloc(this.repository) : super(PermitInitial()) {
-    on<FetchPermits>((event, emit) async {
-      emit(PermitLoading());
-      try {
-        final permits = await repository.fetchPermits();
-        emit(PermitLoaded(permits));
-      } catch (e) {
-        emit(PermitError(e.toString()));
-      }
-    });
+  PermitBloc(this.permitUseCase) : super(PermitInitialState());
 
-    on<CreatePermit>((event, emit) async {
+  @override
+  Stream<PermitState> mapEventToState(PermitEvent event) async* {
+    if (event is GetPermitsEvent) {
+      yield PermitLoadingState();
       try {
-        await repository.createPermit(event.permit);
-        add(FetchPermits()); // Refresh data
+        final permits = await permitUseCase.getPermits(event.idPegawai);
+        yield PermitLoadedState(permits);
       } catch (e) {
-        emit(PermitError(e.toString()));
+        yield PermitErrorState(e.toString());
       }
-    });
+    }
 
-    on<ApprovePermit>((event, emit) async {
+    if (event is SubmitPermitEvent) {
+      yield PermitLoadingState();
       try {
-        await repository.approvePermit(event.id);
-        add(FetchPermits());
+        final permit = await permitUseCase.submitPermit(
+          idPegawai: event.idPegawai,
+          jenisIzin: event.jenisIzin,
+          keterangan: event.keterangan,
+          tanggalMulai: event.tanggalMulai,
+          tanggalAkhir: event.tanggalAkhir,
+          dokumen: event.dokumen,
+        );
+        yield PermitSubmittedState(permit);
       } catch (e) {
-        emit(PermitError(e.toString()));
+        yield PermitErrorState(e.toString());
       }
-    });
-
-    on<RejectPermit>((event, emit) async {
-      try {
-        await repository.rejectPermit(event.id);
-        add(FetchPermits());
-      } catch (e) {
-        emit(PermitError(e.toString()));
-      }
-    });
+    }
   }
 }

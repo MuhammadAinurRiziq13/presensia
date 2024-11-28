@@ -17,7 +17,6 @@ class AbsensiModel extends AbsensiEntity {
           lokasiAbsen: lokasiAbsen,
         );
 
-  // Convert model from JSON to object
   factory AbsensiModel.fromJson(Map<String, dynamic> json) {
     return AbsensiModel(
       idPegawai: json['id_pegawai'],
