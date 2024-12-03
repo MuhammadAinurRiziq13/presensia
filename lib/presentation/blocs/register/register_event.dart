@@ -1,3 +1,5 @@
+import 'dart:io';
+
 abstract class RegisterEvent {}
 
 class RegisterButtonPressed extends RegisterEvent {
@@ -15,4 +17,14 @@ class RegisterButtonPressed extends RegisterEvent {
         assert(alamat.isNotEmpty, 'Alamat tidak boleh kosong'),
         assert(noHp.isNotEmpty, 'Nomor HP tidak boleh kosong'),
         assert(password.isNotEmpty, 'Password tidak boleh kosong');
+}
+
+class RegisterImageEvent extends RegisterEvent {
+  final int idPegawai;
+  final List<File> files;
+
+  RegisterImageEvent({required this.idPegawai, required this.files});
+
+  @override
+  List<Object?> get props => [idPegawai, files];
 }

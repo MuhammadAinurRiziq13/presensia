@@ -1,4 +1,3 @@
-// INI SUDAH SESUAI
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,8 +7,8 @@ class DioClient {
   DioClient({required String baseUrl})
       : _dio = Dio(BaseOptions(
           baseUrl: baseUrl,
-          connectTimeout: const Duration(seconds: 60),
-          receiveTimeout: const Duration(seconds: 60),
+          connectTimeout: const Duration(seconds: 1000),
+          receiveTimeout: const Duration(seconds: 1000),
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -50,11 +49,13 @@ class DioClient {
     return await _dio.get(endpoint, queryParameters: queryParams);
   }
 
+  // Ubah tipe data agar bisa menerima FormData
   Future<Response> post(String endpoint,
-      {Map<String, dynamic>? data, Options? options}) async {
+      {dynamic data, Options? options}) async {
     return await _dio.post(endpoint, data: data, options: options);
   }
 }
+
 
 
 // import 'package:dio/dio.dart';
