@@ -7,7 +7,7 @@ class PermitUseCase {
 
   PermitUseCase(this._permitRepository);
 
-  Future<List<PermitEntity>> getPermits(int idPegawai) async {
+  Future<List<PermitEntity>> execute(int idPegawai) async {
     return await _permitRepository.getPermits(idPegawai);
   }
 

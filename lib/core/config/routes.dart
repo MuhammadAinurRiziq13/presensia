@@ -22,7 +22,9 @@ import 'package:presensia/presentation/screens/splash_screen/splash_screen.dart'
 import 'package:presensia/presentation/screens/profile/profile_page.dart';
 import 'package:presensia/presentation/screens/profile/profile_detail_page.dart';
 import 'package:presensia/presentation/screens/permit/permit_page.dart';
+import 'package:presensia/presentation/screens/permit/permit_request_page.dart';
 import 'package:presensia/presentation/screens/history/history_page.dart';
+import 'package:presensia/presentation/screens/history/permit_history_page.dart';
 import 'package:presensia/presentation/screens/presensi/presensi_page.dart';
 import 'package:presensia/presentation/screens/app.dart';
 import 'package:presensia/presentation/blocs/register/register_bloc.dart';
@@ -150,7 +152,6 @@ class AppRoutes {
         },
       ),
 
-      // Permit Route
       GoRoute(
         path: '/permit',
         builder: (context, state) {
@@ -160,26 +161,39 @@ class AppRoutes {
           final permitUseCase = PermitUseCase(permitRepository);
 
           return BlocProvider(
-            create: (_) => PermitBloc(permitUseCase),
-            child: PermitPage(),
+            create: (_) => PermitsBloc(permitUseCase),
+            child: const PermitPage(),
           );
         },
       ),
-      // Route untuk RiwayatPermitPage (jika ada)
-      // GoRoute(
-      //   path: '/permit/history',
-      //   builder: (context, state) {
-      //     // Inisialisasi datasource, repository, dan use cases untuk riwayat
-      //     final permitApiDataSource = PermitApiDataSource(dioClient);
-      //     final permitRepository = PermitRepositoryImpl(permitApiDataSource);
-      //     final permitUseCase = PermitUseCase(permitRepository);
 
-      //     return BlocProvider(
-      //       create: (_) => PermitBloc(permitUseCase: permitUseCase),
-      //       child: const RiwayatPermitPage(), // Halaman untuk riwayat izin
-      //     );
-      //   },
-      // ),
+      GoRoute(
+        path: '/permit/history',
+        builder: (context, state) {
+          final permitApiDataSource = PermitApiDataSource(AppRoutes.dioClient);
+          final permitRepository = PermitRepositoryImpl(permitApiDataSource);
+          final permitUseCase = PermitUseCase(permitRepository);
+
+          return BlocProvider(
+            create: (_) => PermitsBloc(permitUseCase),
+            child: const HistoryPermitPage(),
+          );
+        },
+      ),
+
+      GoRoute(
+        path: '/permit/store',
+        builder: (context, state) {
+          final permitApiDataSource = PermitApiDataSource(AppRoutes.dioClient);
+          final permitRepository = PermitRepositoryImpl(permitApiDataSource);
+          final permitUseCase = PermitUseCase(permitRepository);
+
+          return BlocProvider(
+            create: (_) => PermitsBloc(permitUseCase),
+            child: const PermitRequestPage(),
+          );
+        },
+      ),
 
       // Profile Route
       GoRoute(

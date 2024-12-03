@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'dart:io'; // Pastikan File import sudah ada
+import 'dart:io';
 
 abstract class PermitEvent extends Equatable {
   @override
@@ -9,7 +9,7 @@ abstract class PermitEvent extends Equatable {
 class GetPermitsEvent extends PermitEvent {
   final int idPegawai;
 
-  GetPermitsEvent(this.idPegawai);
+  GetPermitsEvent({required this.idPegawai});
 
   @override
   List<Object?> get props => [idPegawai];
