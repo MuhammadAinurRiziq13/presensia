@@ -90,10 +90,6 @@ class _PresensiPageState extends State<PresensiPage> {
           }
         },
         builder: (context, state) {
-          if (state is PresensiLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
           return SafeArea(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -246,59 +242,56 @@ class _PresensiPageState extends State<PresensiPage> {
 
                     // Button Section
                     ElevatedButton(
-                      onPressed: _image == null ? _pickImage : _submitPresensi,
+                      onPressed: state is PresensiLoading
+                          ? null
+                          : _image == null
+                              ? _pickImage // Memanggil fungsi untuk mengambil foto jika gambar belum ada
+                              : _submitPresensi, // Kirim presensi jika gambar sudah ada
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: _image == null
-                            ? Colors.blue[700]
-                            : Colors.green[600],
+                        backgroundColor: state is PresensiLoading
+                            ? Colors.grey // Set ke abu-abu saat loading
+                            : _image == null
+                                ? Colors.blue[
+                                    700] // Warna untuk tombol "Ambil Foto Sekarang"
+                                : Colors.green[
+                                    600], // Warna untuk tombol "Kirim Presensi"
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         elevation: 4,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _image == null
-                                ? Icons.camera_alt
-                                : Icons.check_circle,
-                            size: 24,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            _image == null
-                                ? 'Ambil Foto Sekarang'
-                                : 'Kirim Presensi',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                      child: state is PresensiLoading
+                          ? const CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  _image == null
+                                      ? Icons
+                                          .camera_alt // Ikon untuk mengambil foto
+                                      : Icons
+                                          .check_circle, // Ikon untuk mengirim presensi
+                                  size: 24,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  _image == null
+                                      ? 'Ambil Foto Sekarang' // Teks jika gambar belum ada
+                                      : 'Kirim Presensi', // Teks jika gambar sudah ada
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
                     ),
-
-                    if (_image != null) ...[
-                      const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _image = null;
-                          });
-                        },
-                        child: Text(
-                          'Ambil Ulang Foto',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
