@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import '../../data/models/permit_model.dart';
 import '../../core/utils/dio_client/dio_client.dart';
 
@@ -8,11 +7,10 @@ class PermitApiDataSource {
 
   PermitApiDataSource(this._dioClient);
 
-  /// Fetch list of permits for a specific employee
   Future<List<PermitModel>> getPermits(int idPegawai) async {
     try {
       final response = await _dioClient.get(
-        '/permits',
+        '/permit/history',
         queryParams: {'id_pegawai': idPegawai},
       );
 
@@ -33,7 +31,6 @@ class PermitApiDataSource {
     }
   }
 
-  /// Submit a new permit
   Future<PermitModel> submitPermit(Map<String, dynamic> payload,
       {required int idPegawai,
       required String jenisIzin,
@@ -43,7 +40,7 @@ class PermitApiDataSource {
       File? dokumen}) async {
     try {
       final response = await _dioClient.post(
-        '/permits',
+        '/permit/store',
         data: payload,
       );
 

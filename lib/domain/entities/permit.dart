@@ -44,7 +44,7 @@ class PermitEntity extends Equatable {
       tanggalMulai: DateTime.parse(json['tanggal_mulai']),
       tanggalAkhir: DateTime.parse(json['tanggal_akhir']),
       keterangan: json['keterangan'],
-      dokumen: json['dokumen'],
+      dokumen: json['dokumen']?.toString(),
     );
   }
 
