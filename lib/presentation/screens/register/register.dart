@@ -49,12 +49,12 @@ class _RegisterPageState extends State<RegisterPage> {
     return BlocConsumer<RegisterBloc, RegisterState>(
       listener: (context, state) {
         if (state is RegisterSuccess) {
-          SharedPreferences.getInstance().then((prefs) {
-            prefs.setBool('isRegistered', true);
-          });
+          // SharedPreferences.getInstance().then((prefs) {
+          //   prefs.setBool('isRegistered', true);
+          // });
 
           // Navigasi ke halaman login
-          context.go('/login');
+          context.go('/register/image');
         } else if (state is RegisterFailure) {
           setState(() {
             if (state.errorMessage.contains('Nomor pegawai')) {

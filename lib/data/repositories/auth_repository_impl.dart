@@ -1,6 +1,7 @@
 import '../datasources/auth_api_datasource.dart';
 import '../../domain/entities/pegawai.dart';
 import '../../domain/repositories/auth_repository.dart';
+import 'dart:io';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthApiDataSource _authApiDataSource;
@@ -25,6 +26,23 @@ class AuthRepositoryImpl implements AuthRepository {
       return pegawaiModel;
     } catch (e) {
       print('Registration failed: ${e.toString()}');
+      rethrow;
+    }
+  }
+
+  // Register Image
+  @override
+  Future<Map<String, dynamic>> registerImage({
+    required int idPegawai,
+    required List<File> files,
+  }) async {
+    try {
+      final response = await _authApiDataSource.registerImage(
+        idPegawai: idPegawai,
+        files: files,
+      );
+      return response;
+    } catch (e) {
       rethrow;
     }
   }

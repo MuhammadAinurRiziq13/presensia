@@ -1,4 +1,5 @@
 import '../entities/pegawai.dart';
+import 'dart:io';
 
 abstract class AuthRepository {
   Future<PegawaiEntity> register({
@@ -6,6 +7,11 @@ abstract class AuthRepository {
     required String alamat,
     required String noHp,
     required String password,
+  });
+
+  Future<Map<String, dynamic>> registerImage({
+    required int idPegawai,
+    required List<File> files,
   });
 
   Future<PegawaiEntity> login({
