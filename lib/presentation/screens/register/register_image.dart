@@ -5,6 +5,7 @@ import 'package:presensia/presentation/blocs/register/register_bloc.dart';
 import 'package:presensia/presentation/blocs/register/register_event.dart';
 import 'package:presensia/presentation/blocs/register/register_state.dart';
 import 'dart:io';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 
 class RegisterImage extends StatefulWidget {
@@ -21,12 +22,14 @@ class _RegisterImageState extends State<RegisterImage>
   bool _isTakingPhoto = false;
   late List<XFile> _images;
   int _imageIndex = 0;
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   @override
   void initState() {
     super.initState();
     _images = [];
     _initializeCamera();
+    _initializeLocalNotifications();
   }
 
   Future<void> _initializeCamera() async {
@@ -43,6 +46,35 @@ class _RegisterImageState extends State<RegisterImage>
     } catch (e) {
       print("Error initializing camera: $e");
     }
+  }
+
+  // Menginisialisasi flutter local notifications
+  Future<void> _initializeLocalNotifications() async {
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    const initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  // Fungsi untuk menampilkan notifikasi
+  Future<void> _showNotification(String message) async {
+    const androidDetails = AndroidNotificationDetails(
+      'default_channel',
+      'Default Channel',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const platformDetails = NotificationDetails(android: androidDetails);
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'Pendaftaran Gambar',
+      message,
+      platformDetails,
+    );
   }
 
   Future<void> _takePicture() async {
@@ -153,15 +185,12 @@ class _RegisterImageState extends State<RegisterImage>
     return BlocConsumer<RegisterBloc, RegisterState>(
       listener: (context, state) {
         if (state is RegisterImageSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Images uploaded successfully!')),
-          );
-          context.go('/login');
+          // Tampilkan notifikasi setelah berhasil mengirim gambar
+          _showNotification('Images uploaded successfully!');
         }
         if (state is RegisterImageFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage)),
-          );
+          // Tampilkan notifikasi jika terjadi error
+          _showNotification(state.errorMessage);
         }
       },
       builder: (context, state) {
@@ -191,11 +220,14 @@ class _RegisterImageState extends State<RegisterImage>
           child: ElevatedButton(
             onPressed: () async {
               if (_images.length < 5) {
-                await _takePicture(); // Take picture if images are less than 5
+                await _takePicture(); // Ambil foto jika kurang dari 5
               } else {
-                // Trigger the image submission to Bloc
+                // Kirim gambar ke server secara asinkron
+                // Pindah halaman ke login sebelum menunggu response API
+                context.go('/login');
+
+                // Kirim gambar setelah berpindah halaman
                 context.read<RegisterBloc>().add(RegisterImageEvent(
-                      idPegawai: 123, // Replace with actual idPegawai
                       files: _images.map((image) => File(image.path)).toList(),
                     ));
               }
@@ -209,8 +241,7 @@ class _RegisterImageState extends State<RegisterImage>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50),
               ),
-              minimumSize:
-                  const Size(500, 50), // Set a fixed size for the button
+              minimumSize: const Size(500, 50), // Ukuran tetap untuk tombol
             ),
             child: isLoading
                 ? const CircularProgressIndicator(

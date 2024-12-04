@@ -20,11 +20,11 @@ class RegisterButtonPressed extends RegisterEvent {
 }
 
 class RegisterImageEvent extends RegisterEvent {
-  final int idPegawai;
+  // final int idPegawai;
   final List<File> files;
 
-  RegisterImageEvent({required this.idPegawai, required this.files});
+  RegisterImageEvent({required this.files});
 
   @override
-  List<Object?> get props => [idPegawai, files];
+  List<Object?> get props => [files];
 }
