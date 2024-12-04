@@ -7,6 +7,7 @@ import 'package:presensia/presentation/blocs/register/register_state.dart';
 import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterImage extends StatefulWidget {
   const RegisterImage({super.key});
@@ -224,6 +225,9 @@ class _RegisterImageState extends State<RegisterImage>
               } else {
                 // Kirim gambar ke server secara asinkron
                 // Pindah halaman ke login sebelum menunggu response API
+                SharedPreferences.getInstance().then((prefs) {
+                  prefs.setBool('isRegistered', true);
+                });
                 context.go('/login');
 
                 // Kirim gambar setelah berpindah halaman

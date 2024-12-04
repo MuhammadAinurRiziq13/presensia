@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../presentation/widgets/bottom_navigation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
 
 class PermitPage extends StatefulWidget {
   const PermitPage({super.key});
@@ -67,6 +70,57 @@ class _PermitPageState extends State<PermitPage> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: Builder(
+        builder: (context) {
+          // Membaca data id_absensi dari SharedPreferences dan mengonversi menjadi integer
+          Future<int?> getIdAbsensi() async {
+            final prefs = await SharedPreferences.getInstance();
+            return prefs.getInt('id_absensi');
+          }
+
+          return FutureBuilder<int?>(
+            future: getIdAbsensi(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                // Menampilkan indikator loading ketika data sedang dimuat
+                return const CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                // Menangani kesalahan jika ada error dalam mengambil data
+                return const Icon(Icons.error);
+              } else {
+                int? idAbsensi = snapshot.data;
+
+                // Mengatur kondisi FAB berdasarkan id_absensi yang diambil
+                final isDisabled = idAbsensi != null;
+
+                return SizedBox(
+                  width: 65.0,
+                  height: 65.0,
+                  child: FloatingActionButton(
+                    onPressed: isDisabled
+                        ? null
+                        : () {
+                            GoRouter.of(context).go('/presensi');
+                          },
+                    backgroundColor: isDisabled ? Colors.green : Colors.blue,
+                    shape: const CircleBorder(),
+                    child: Icon(
+                      isDisabled ? Icons.check_circle : Icons.camera_alt,
+                      size: 35.0,
+                      color: Colors.white,
+                    ),
+                    heroTag: 'fab-home', // Tag unik untuk FAB di halaman ini
+                  ),
+                );
+              }
+            },
+          );
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: const BottomNavigationWidget(
+        currentIndex: 3, // Index tab aktif untuk halaman Home
       ),
     );
   }

@@ -43,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
     if (isRegistered) {
       // Jika registrasi berhasil, tampilkan Flushbar sukses
       showSuccessFlushbar(
-          context, 'Pendaftaran berhasil! Selamat datang di aplikasi!');
+          context, 'Pendaftaran Sedang Diproses!, Harap Ditunggu');
 
       // Setelah Flushbar ditampilkan, reset status registrasi
       prefs.setBool('isRegistered', false);
