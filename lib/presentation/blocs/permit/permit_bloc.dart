@@ -1,22 +1,24 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'permit_event.dart';
 import 'permit_state.dart';
 import 'package:presensia/domain/usecases/permit_usecase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:presensia/domain/entities/permit.dart';
 
 class PermitsBloc extends Bloc<PermitEvent, PermitState> {
-  final PermitUseCase getPermitsUseCase;
+  final PermitUseCase permitUseCase;
 
-  PermitsBloc(this.getPermitsUseCase) : super(PermitInitialState()) {
+  PermitsBloc(this.permitUseCase) : super(PermitInitialState()) {
     on<GetPermitsEvent>(_onGetPermitsButtonPressed);
+    on<SubmitPermitEvent>(_onSubmitPermit); // Handler untuk submit izin
   }
+
   Future<void> _onGetPermitsButtonPressed(
     GetPermitsEvent event,
     Emitter<PermitState> emit,
   ) async {
     emit(PermitLoadingState());
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final idPegawai = prefs.getInt('id_pegawai') ?? 0;
@@ -27,50 +29,41 @@ class PermitsBloc extends Bloc<PermitEvent, PermitState> {
       }
 
       // Fetch user data
-      final permit = await getPermitsUseCase.execute(idPegawai);
+      final permits = await permitUseCase.execute(idPegawai);
 
-      emit(PermitSuccess(
-        permits: permit,
-      ));
+      emit(PermitSuccess(permits: permits));
     } catch (e) {
       emit(PermitFailure("Error fetching data: ${e.toString()}"));
     }
   }
+
+  Future<void> _onSubmitPermit(
+    SubmitPermitEvent event,
+    Emitter<PermitState> emit,
+  ) async {
+    emit(PermitLoadingState());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final dokumen = event.jenisIzin == 'Sakit' ? event.dokumen : null;
+      final idPegawai = prefs.getInt('id_pegawai') ?? 0;
+
+      final permit = await permitUseCase.submitPermit(
+        idPegawai: idPegawai,
+        jenisIzin: event.jenisIzin,
+        keterangan: event.keterangan,
+        tanggalMulai: event.tanggalMulai,
+        tanggalAkhir: event.tanggalAkhir,
+        dokumen: dokumen,
+      );
+
+      emit(PermitSubmittedState(permit));
+    } catch (e) {
+      if (e is DioException) {
+        final errorMessage = e.response?.data ?? 'Unknown error';
+        emit(PermitFailure("Error submitting permit: $errorMessage"));
+      } else {
+        emit(PermitFailure("Error submitting permit: ${e.toString()}"));
+      }
+    }
+  }
 }
-
-
-// class PermitBloc extends Bloc<PermitEvent, PermitState> {
-//   final PermitUseCase permitUseCase;
-
-//   PermitBloc(this.permitUseCase) : super(PermitInitialState());
-
-//   @override
-//   Stream<PermitState> mapEventToState(PermitEvent event) async* {
-//     if (event is GetPermitsEvent) {
-//       yield PermitLoadingState();
-//       try {
-//         final permits = await permitUseCase.execute(event.idPegawai);
-//         yield PermitSuccess(permits);
-//       } catch (e) {
-//         yield PermitFailure(e.toString());
-//       }
-//     }
-
-//     if (event is SubmitPermitEvent) {
-//       yield PermitLoadingState();
-//       try {
-//         final permit = await permitUseCase.submitPermit(
-//           idPegawai: event.idPegawai,
-//           jenisIzin: event.jenisIzin,
-//           keterangan: event.keterangan,
-//           tanggalMulai: event.tanggalMulai,
-//           tanggalAkhir: event.tanggalAkhir,
-//           dokumen: event.dokumen,
-//         );
-//         yield PermitSubmittedState(permit);
-//       } catch (e) {
-//         yield PermitFailure(e.toString());
-//       }
-//     }
-//   }
-// }

@@ -33,33 +33,16 @@ class PermitRepositoryImpl implements PermitRepository {
     required DateTime tanggalAkhir,
     File? dokumen,
   }) async {
-    try {
-      // Create payload for the API call
-      final payload = {
-        'id_pegawai': idPegawai,
-        'jenis_izin': jenisIzin,
-        'keterangan': keterangan,
-        'tanggal_mulai': tanggalMulai.toIso8601String(),
-        'tanggal_akhir': tanggalAkhir.toIso8601String(),
-        'dokumen': dokumen != null ? await dokumen.readAsBytes() : null,
-      };
+    final permitModel = await _permitApiDataSource.submitPermit(
+      idPegawai: idPegawai,
+      jenisIzin: jenisIzin,
+      keterangan: keterangan,
+      tanggalMulai: tanggalMulai,
+      tanggalAkhir: tanggalAkhir,
+      dokumen: dokumen,
+    );
 
-      // Submit the permit via API
-      final permitModel = await _permitApiDataSource.submitPermit(
-        payload,
-        idPegawai: idPegawai,
-        jenisIzin: jenisIzin,
-        keterangan: keterangan,
-        tanggalMulai: tanggalMulai,
-        tanggalAkhir: tanggalAkhir,
-        dokumen: dokumen,
-      );
-
-      // Return the PermitEntity converted from PermitModel
-      return PermitEntity.fromModel(permitModel);
-    } catch (e) {
-      print('Error submitting permit: ${e.toString()}');
-      rethrow;
-    }
+    // Return the PermitEntity converted from PermitModel
+    return PermitEntity.fromModel(permitModel);
   }
 }
