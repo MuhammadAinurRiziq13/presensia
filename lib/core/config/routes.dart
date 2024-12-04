@@ -187,7 +187,7 @@ class AppRoutes {
 
           return BlocProvider(
             create: (_) => PermitsBloc(permitUseCase),
-            child: const PermitRequestPage(),
+            child: PermitRequestPage(),
           );
         },
       ),
