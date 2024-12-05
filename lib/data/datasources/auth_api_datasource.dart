@@ -59,6 +59,8 @@ class AuthApiDataSource {
       }
 
       if (response.statusCode == 200) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.clear();
         return response.data;
       } else {
         throw Exception('Failed to upload images');
@@ -91,6 +93,7 @@ class AuthApiDataSource {
 
       // Simpan token ke SharedPreferences
       final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
       await prefs.setString('auth_token', token);
 
       // Kembalikan data pegawai
