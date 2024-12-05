@@ -29,8 +29,8 @@ class PermitModel extends PermitEntity {
       statusIzin: json['status_izin'] ?? 'Unknown',
       tanggalMulai: DateTime.parse(json['tanggal_mulai']),
       tanggalAkhir: DateTime.parse(json['tanggal_akhir']),
-      keterangan: json['keterangan'],
-      dokumen: json['dokumen']?.toString(), // Konversi ke string jika ada
+      keterangan: json['keterangan'] ?? 'Unknown',
+      dokumen: json['dokumen'], // Konversi ke string jika ada
     );
   }
 }

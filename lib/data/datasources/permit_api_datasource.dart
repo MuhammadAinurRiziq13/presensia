@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import '../../data/models/permit_model.dart';
 import '../../core/utils/dio_client/dio_client.dart';
 
@@ -31,21 +32,38 @@ class PermitApiDataSource {
     }
   }
 
-  Future<PermitModel> submitPermit(Map<String, dynamic> payload,
-      {required int idPegawai,
-      required String jenisIzin,
-      required String keterangan,
-      required DateTime tanggalMulai,
-      required DateTime tanggalAkhir,
-      File? dokumen}) async {
+  Future<PermitModel> submitPermit({
+    required int idPegawai,
+    required String jenisIzin,
+    required String keterangan,
+    required DateTime tanggalMulai,
+    required DateTime tanggalAkhir,
+    File? dokumen, // Dokumen opsional
+  }) async {
+    if (idPegawai <= 0) {
+      throw Exception("Id Pegawai tidak valid");
+    }
     try {
+      final formData = FormData.fromMap({
+        'id_pegawai': idPegawai.toString(),
+        'jenis_izin': jenisIzin,
+        'keterangan': keterangan,
+        'tanggal_mulai': tanggalMulai.toIso8601String(),
+        'tanggal_akhir': tanggalAkhir.toIso8601String(),
+        if (dokumen != null) // Hanya kirim dokumen jika ada
+          'dokumen': await MultipartFile.fromFile(
+            dokumen.path,
+            filename: dokumen.path.split('/').last,
+          ),
+      });
+
       final response = await _dioClient.post(
         '/permit/store',
-        data: payload,
+        data: formData,
+        options: Options(contentType: 'multipart/form-data'),
       );
 
-      if (response.statusCode == 201) {
-        print('Response JSON: ${response.data}');
+      if (response.statusCode == 200) {
         return PermitModel.fromJson(response.data['data']);
       } else {
         throw Exception(response.data['message'] ?? 'Failed to submit permit');

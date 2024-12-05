@@ -16,29 +16,27 @@ class GetPermitsEvent extends PermitEvent {
 }
 
 class SubmitPermitEvent extends PermitEvent {
-  final int idPegawai;
   final String jenisIzin;
   final String keterangan;
   final DateTime tanggalMulai;
   final DateTime tanggalAkhir;
-  final File? dokumen; // Mengubah menjadi File? bukan String?
+  final File? dokumen; // Dokumen opsional, bisa null
 
   SubmitPermitEvent({
-    required this.idPegawai,
     required this.jenisIzin,
     required this.keterangan,
     required this.tanggalMulai,
     required this.tanggalAkhir,
-    this.dokumen, // Dokumen opsional, bisa null
+    this.dokumen,
+    required int idPegawai, // Dokumen opsional, bisa null
   });
 
-  @override
-  List<Object?> get props => [
-        idPegawai,
-        jenisIzin,
-        keterangan,
-        tanggalMulai,
-        tanggalAkhir,
-        dokumen ?? '', // Dokumen bisa null
-      ];
+  // @override
+  // List<Object?> get props => [
+  //       jenisIzin,
+  //       keterangan,
+  //       tanggalMulai,
+  //       tanggalAkhir,
+  //       dokumen ?? '', // Dokumen bisa null
+  //     ];
 }

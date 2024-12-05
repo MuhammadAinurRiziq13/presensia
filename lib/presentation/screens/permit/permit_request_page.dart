@@ -1,6 +1,12 @@
-// TEMPLATE UI JANGAN SAMPAI TERHAPUS
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:presensia/presentation/blocs/permit/permit_bloc.dart';
+import 'package:presensia/presentation/blocs/permit/permit_event.dart';
+import 'package:presensia/presentation/blocs/permit/permit_state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PermitRequestPage extends StatefulWidget {
   const PermitRequestPage({super.key});
@@ -13,6 +19,13 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
   String _selectedPermitType = 'Cuti'; // Default tipe izin
   DateTimeRange? _dateRange; // Menyimpan range tanggal
   final TextEditingController _remarksController = TextEditingController();
+  File? _selectedDocument;
+  bool _isSubmitting = false; // Untuk menampilkan indikator loading
+
+  Future<int> _getIdPegawai() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('id_pegawai') ?? 0;
+  }
 
   Future<void> _selectDateRange(BuildContext context) async {
     final DateTimeRange? pickedDateRange = await showDateRangePicker(
@@ -25,6 +38,85 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
         _dateRange = pickedDateRange;
       });
     }
+  }
+
+  Future<void> _pickDocument() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.any);
+    if (result != null && result.files.single.path != null) {
+      setState(() {
+        _selectedDocument = File(result.files.single.path!);
+      });
+    }
+  }
+
+  void _submitPermit() async {
+    final idPegawai = await _getIdPegawai();
+
+    if (idPegawai == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ID Pegawai tidak ditemukan')),
+      );
+      return;
+    }
+
+    if (_selectedPermitType == 'Sakit' && _selectedDocument == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Dokumen wajib diunggah untuk izin Sakit')),
+      );
+      return;
+    }
+
+    if (_dateRange == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tanggal izin harus dipilih')),
+      );
+      return;
+    }
+
+    final jenisIzin = _selectedPermitType;
+    final keterangan = _remarksController.text;
+    final tanggalMulai = _dateRange!.start;
+    final tanggalAkhir = _dateRange!.end;
+
+    // Pastikan tanggalMulai dan tanggalAkhir bukan null sebelum diproses
+    if (tanggalMulai == null || tanggalAkhir == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tanggal mulai dan akhir tidak valid')),
+      );
+      return;
+    }
+    print('Tanggal Mulai: $tanggalMulai');
+
+    // Format tanggal agar sesuai dengan yang diharapkan oleh server
+    final formattedTanggalMulai = DateFormat('yyyy-MM-dd').format(tanggalMulai);
+    final formattedTanggalAkhir = DateFormat('yyyy-MM-dd').format(tanggalAkhir);
+
+    // Log the data for debugging
+    print('ID Pegawai: $idPegawai');
+    print('Jenis Izin: $jenisIzin');
+    print('Keterangan: $keterangan');
+    print('Tanggal Mulai: $formattedTanggalMulai');
+    print('Tanggal Akhir: $formattedTanggalAkhir');
+    print('Dokumen: ${_selectedDocument?.path}');
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    // Kirim event submit permit
+    BlocProvider.of<PermitsBloc>(context).add(
+      SubmitPermitEvent(
+        idPegawai: 1,
+        jenisIzin: "cuti",
+        keterangan: "tes",
+        tanggalMulai: tanggalMulai, // Kirim tanggal dalam format string
+        tanggalAkhir: tanggalAkhir, // Kirim tanggal dalam format string
+        dokumen: _selectedPermitType == 'Sakit'
+            ? _selectedDocument
+            : null, // Hanya kirim dokumen jika izin Sakit
+      ),
+    );
   }
 
   @override
@@ -40,75 +132,103 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(10.0),
+      body: BlocListener<PermitsBloc, PermitState>(
+        listener: (context, state) {
+          if (state is PermitSubmittedState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Permohonan Izin Berhasil')),
+            );
+            setState(() {
+              _isSubmitting = false;
+            });
+          } else if (state is PermitFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+            setState(() {
+              _isSubmitting = false;
+            });
+          }
+        },
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Jenis Perizinan:",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      RadioListTile<String>(
-                        title: const Text('Sakit'),
-                        value: 'Sakit',
-                        groupValue: _selectedPermitType,
-                        onChanged: (String? value) {
-                          setState(() {
-                            _selectedPermitType = value!;
-                          });
-                        },
-                      ),
-                      RadioListTile<String>(
-                        title: const Text('Cuti'),
-                        value: 'Cuti',
-                        groupValue: _selectedPermitType,
-                        onChanged: (String? value) {
-                          setState(() {
-                            _selectedPermitType = value!;
-                          });
-                        },
-                      ),
-                      RadioListTile<String>(
-                        title: const Text('WFA (Work From Anywhere)'),
-                        value: 'WFA',
-                        groupValue: _selectedPermitType,
-                        onChanged: (String? value) {
-                          setState(() {
-                            _selectedPermitType = value!;
-                          });
-                        },
-                      ),
-                    ],
+                ],
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Tipe perizinan
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Jenis Perizinan:",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        RadioListTile<String>(
+                          title: const Text('Sakit'),
+                          value: 'Sakit',
+                          groupValue: _selectedPermitType,
+                          onChanged: (String? value) {
+                            setState(() {
+                              _selectedPermitType = value!;
+                            });
+                          },
+                        ),
+                        RadioListTile<String>(
+                          title: const Text('Cuti'),
+                          value: 'Cuti',
+                          groupValue: _selectedPermitType,
+                          onChanged: (String? value) {
+                            setState(() {
+                              _selectedPermitType = value!;
+                              _selectedDocument = null; // Reset dokumen
+                            });
+                          },
+                        ),
+                        RadioListTile<String>(
+                          title: const Text('WFA (Work From Anywhere)'),
+                          value: 'WFA',
+                          groupValue: _selectedPermitType,
+                          onChanged: (String? value) {
+                            setState(() {
+                              _selectedPermitType = value!;
+                              _selectedDocument = null; // Reset dokumen
+                            });
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                if (_selectedPermitType != 'Sakit')
+                  const SizedBox(height: 16),
+                  if (_selectedPermitType == 'Sakit')
+                    ElevatedButton(
+                      onPressed: _pickDocument,
+                      child: Text(_selectedDocument != null
+                          ? 'Dokumen Terpilih'
+                          : 'Unggah Dokumen'),
+                    ),
+                  const SizedBox(height: 16),
                   GestureDetector(
                     onTap: () => _selectDateRange(context),
                     child: Container(
@@ -126,24 +246,26 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                       ),
                     ),
                   ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _remarksController,
-                  decoration: InputDecoration(
-                    labelText: 'Keterangan',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _remarksController,
+                    decoration: InputDecoration(
+                      labelText: 'Keterangan',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    // Aksi ketika tombol kirim ditekan
-                  },
-                  child: const Text('Kirim'),
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  if (_isSubmitting)
+                    const Center(child: CircularProgressIndicator())
+                  else
+                    ElevatedButton(
+                      onPressed: _submitPermit,
+                      child: const Text('Ajukan Permohonan'),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -152,39 +274,194 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
   }
 }
 
-// Widget untuk menampilkan range tanggal pada kalender
-class CalendarDateRangeWidget extends StatelessWidget {
-  final DateTimeRange dateRange;
 
-  const CalendarDateRangeWidget({super.key, required this.dateRange});
 
-  @override
-  Widget build(BuildContext context) {
-    // Extracting the start and end date
-    DateTime startDate = dateRange.start;
-    DateTime endDate = dateRange.end;
 
-    // Formatting months
-    String startMonth = DateFormat('MMMM').format(startDate); // e.g. "January"
-    String endMonth = DateFormat('MMMM').format(endDate); // e.g. "February"
+// import 'package:flutter/material.dart';
+// import 'package:intl/intl.dart';
+// import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:presensia/presentation/blocs/permit/permit_bloc.dart';
+// import 'package:presensia/presentation/blocs/permit/permit_event.dart';
+// import 'package:presensia/presentation/blocs/permit/permit_state.dart';
 
-    // Calculate total number of days in the range
-    int daysCount =
-        endDate.difference(startDate).inDays + 1; // Include the start day
+// class PermitRequestPage extends StatefulWidget {
+//   const PermitRequestPage({super.key});
 
-    // Prepare the display text
-    String displayText;
-    if (startMonth == endMonth) {
-      displayText = '$startMonth ($daysCount hari)'; // Same month
-    } else {
-      displayText =
-          '$startMonth - $endMonth ($daysCount hari)'; // Different months
-    }
+//   @override
+//   _PermitRequestPageState createState() => _PermitRequestPageState();
+// }
 
-    return Text(
-      displayText,
-      style: const TextStyle(
-          fontSize: 16, color: Colors.blue, fontWeight: FontWeight.bold),
-    );
-  }
-}
+// class _PermitRequestPageState extends State<PermitRequestPage> {
+//   String _selectedPermitType = 'Cuti'; // Default tipe izin
+//   DateTimeRange? _dateRange; // Menyimpan range tanggal
+//   final TextEditingController _remarksController = TextEditingController();
+
+//   Future<void> _selectDateRange(BuildContext context) async {
+//     final DateTimeRange? pickedDateRange = await showDateRangePicker(
+//       context: context,
+//       firstDate: DateTime(2020),
+//       lastDate: DateTime(2025),
+//     );
+//     if (pickedDateRange != null && pickedDateRange != _dateRange) {
+//       setState(() {
+//         _dateRange = pickedDateRange;
+//       });
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text(
+//           'Ajukan Perizinan',
+//           style: TextStyle(color: Colors.black),
+//         ),
+//         backgroundColor: Colors.white,
+//         elevation: 0,
+//         centerTitle: true,
+//         iconTheme: const IconThemeData(color: Colors.black),
+//       ),
+//       body: SingleChildScrollView(
+//         child: Padding(
+//           padding: const EdgeInsets.all(16.0),
+//           child: Container(
+//             decoration: BoxDecoration(
+//               color: Colors.white,
+//               borderRadius: BorderRadius.circular(12.0),
+//               boxShadow: [
+//                 BoxShadow(
+//                   color: Colors.black.withOpacity(0.1),
+//                   blurRadius: 10,
+//                   offset: const Offset(0, 5),
+//                 ),
+//               ],
+//             ),
+//             padding: const EdgeInsets.all(16),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.stretch,
+//               children: [
+//                 Container(
+//                   decoration: BoxDecoration(
+//                     border: Border.all(color: Colors.grey),
+//                     borderRadius: BorderRadius.circular(10.0),
+//                   ),
+//                   padding: const EdgeInsets.symmetric(
+//                       horizontal: 16.0, vertical: 8.0),
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       const Text(
+//                         "Jenis Perizinan:",
+//                         style: TextStyle(
+//                             fontSize: 16, fontWeight: FontWeight.bold),
+//                       ),
+//                       RadioListTile<String>(
+//                         title: const Text('Sakit'),
+//                         value: 'Sakit',
+//                         groupValue: _selectedPermitType,
+//                         onChanged: (String? value) {
+//                           setState(() {
+//                             _selectedPermitType = value!;
+//                           });
+//                         },
+//                       ),
+//                       RadioListTile<String>(
+//                         title: const Text('Cuti'),
+//                         value: 'Cuti',
+//                         groupValue: _selectedPermitType,
+//                         onChanged: (String? value) {
+//                           setState(() {
+//                             _selectedPermitType = value!;
+//                           });
+//                         },
+//                       ),
+//                       RadioListTile<String>(
+//                         title: const Text('WFA (Work From Anywhere)'),
+//                         value: 'WFA',
+//                         groupValue: _selectedPermitType,
+//                         onChanged: (String? value) {
+//                           setState(() {
+//                             _selectedPermitType = value!;
+//                           });
+//                         },
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 const SizedBox(height: 16),
+//                 if (_selectedPermitType != 'Sakit')
+//                   GestureDetector(
+//                     onTap: () => _selectDateRange(context),
+//                     child: Container(
+//                       decoration: BoxDecoration(
+//                         border: Border.all(color: Colors.grey),
+//                         borderRadius: BorderRadius.circular(10.0),
+//                       ),
+//                       padding: const EdgeInsets.all(16),
+//                       child: Text(
+//                         _dateRange == null
+//                             ? 'Pilih Tanggal'
+//                             : '${DateFormat('dd MMM yyyy').format(_dateRange!.start)} - ${DateFormat('dd MMM yyyy').format(_dateRange!.end)}',
+//                         style: const TextStyle(
+//                             fontSize: 16, fontWeight: FontWeight.bold),
+//                       ),
+//                     ),
+//                   ),
+//                 const SizedBox(height: 16),
+//                 TextField(
+//                   controller: _remarksController,
+//                   decoration: InputDecoration(
+//                     labelText: 'Keterangan',
+//                     border: OutlineInputBorder(
+//                       borderRadius: BorderRadius.circular(10.0),
+//                     ),
+//                   ),
+//                 ),
+//                 const SizedBox(height: 20),
+//                 ElevatedButton(
+//                   onPressed: () {
+//                     // Aksi ketika tombol kirim ditekan
+//                     final idPegawai =
+//                         1; // Hardcoded for testing, replace with actual value
+//                     final jenisIzin = _selectedPermitType;
+//                     final keterangan = _remarksController.text;
+//                     final tanggalMulai = _dateRange?.start ?? DateTime.now();
+//                     final tanggalAkhir = _dateRange?.end ?? DateTime.now();
+
+//                     // Trigger SubmitPermitEvent
+//                     BlocProvider.of<PermitsBloc>(context).add(
+//                       SubmitPermitEvent(
+//                         idPegawai: idPegawai,
+//                         jenisIzin: jenisIzin,
+//                         keterangan: keterangan,
+//                         tanggalMulai: tanggalMulai,
+//                         tanggalAkhir: tanggalAkhir,
+//                         dokumen: null, // Add document if necessary
+//                       ),
+//                     );
+//                   },
+//                   child: const Text('Kirim'),
+//                 ),
+//                 BlocListener<PermitsBloc, PermitState>(
+//                   listener: (context, state) {
+//                     if (state is PermitSubmittedState) {
+//                       ScaffoldMessenger.of(context).showSnackBar(
+//                         SnackBar(content: Text('Permohonan Izin Berhasil')),
+//                       );
+//                     } else if (state is PermitFailure) {
+//                       ScaffoldMessenger.of(context).showSnackBar(
+//                         SnackBar(content: Text(state.message)),
+//                       );
+//                     }
+//                   },
+//                   child: Container(),
+//                 ),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
