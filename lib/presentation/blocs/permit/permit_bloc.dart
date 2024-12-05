@@ -45,6 +45,7 @@ class PermitsBloc extends Bloc<PermitEvent, PermitState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final dokumen = event.jenisIzin == 'Sakit' ? event.dokumen : null;
+
       final idPegawai = prefs.getInt('id_pegawai') ?? 0;
 
       final permit = await permitUseCase.submitPermit(
@@ -60,9 +61,9 @@ class PermitsBloc extends Bloc<PermitEvent, PermitState> {
     } catch (e) {
       if (e is DioException) {
         final errorMessage = e.response?.data ?? 'Unknown error';
-        emit(PermitFailure("Error submitting permit: $errorMessage"));
+        emit(PermitFailure("Error submitting permit bloc: $errorMessage"));
       } else {
-        emit(PermitFailure("Error submitting permit: ${e.toString()}"));
+        emit(PermitFailure("Error submitting permit bloc: ${e.toString()}"));
       }
     }
   }

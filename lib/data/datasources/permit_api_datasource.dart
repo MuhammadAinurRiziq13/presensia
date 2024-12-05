@@ -69,7 +69,7 @@ class PermitApiDataSource {
         throw Exception(response.data['message'] ?? 'Failed to submit permit');
       }
     } catch (e) {
-      throw Exception('Error submitting permit: ${e.toString()}');
+      throw Exception('Error submitting permit datasource: ${e.toString()}');
     }
   }
 }

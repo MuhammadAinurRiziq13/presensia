@@ -7,6 +7,7 @@ import 'package:presensia/presentation/blocs/permit/permit_bloc.dart';
 import 'package:presensia/presentation/blocs/permit/permit_event.dart';
 import 'package:presensia/presentation/blocs/permit/permit_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/utils/flushbar_helper.dart';
 
 class PermitRequestPage extends StatefulWidget {
   const PermitRequestPage({super.key});
@@ -49,6 +50,23 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
     }
   }
 
+  // Fungsi untuk menghapus dokumen
+  void _removeDocument() {
+    setState(() {
+      _selectedDocument = null;
+    });
+  }
+
+  // Fungsi untuk mereset semua input
+  void _resetInputs() {
+    setState(() {
+      _selectedPermitType = 'Cuti';
+      _dateRange = null;
+      _remarksController.clear();
+      _selectedDocument = null;
+    });
+  }
+
   void _submitPermit() async {
     final idPegawai = await _getIdPegawai();
 
@@ -60,17 +78,12 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
     }
 
     if (_selectedPermitType == 'Sakit' && _selectedDocument == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Dokumen wajib diunggah untuk izin Sakit')),
-      );
+      showErrorFlushbar(context, 'Dokumen wajib diunggah untuk izin Sakit');
       return;
     }
 
     if (_dateRange == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tanggal izin harus dipilih')),
-      );
+      showErrorFlushbar(context, 'Tanggal izin harus dipilih');
       return;
     }
 
@@ -79,11 +92,15 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
     final tanggalMulai = _dateRange!.start;
     final tanggalAkhir = _dateRange!.end;
 
+    // Pastikan keterangan tidak kosong
+    if (keterangan.isEmpty) {
+      showErrorFlushbar(context, 'Keterangan wajib diisi');
+      return;
+    }
+
     // Pastikan tanggalMulai dan tanggalAkhir bukan null sebelum diproses
     if (tanggalMulai == null || tanggalAkhir == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tanggal mulai dan akhir tidak valid')),
-      );
+      showErrorFlushbar(context, 'Tanggal mulai dan akhir tidak valid');
       return;
     }
     print('Tanggal Mulai: $tanggalMulai');
@@ -107,9 +124,8 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
     // Kirim event submit permit
     BlocProvider.of<PermitsBloc>(context).add(
       SubmitPermitEvent(
-        idPegawai: 1,
-        jenisIzin: "cuti",
-        keterangan: "tes",
+        jenisIzin: jenisIzin,
+        keterangan: keterangan,
         tanggalMulai: tanggalMulai, // Kirim tanggal dalam format string
         tanggalAkhir: tanggalAkhir, // Kirim tanggal dalam format string
         dokumen: _selectedPermitType == 'Sakit'
@@ -135,16 +151,13 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
       body: BlocListener<PermitsBloc, PermitState>(
         listener: (context, state) {
           if (state is PermitSubmittedState) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Permohonan Izin Berhasil')),
-            );
+            showSuccessFlushbar(context, 'Presensi berhasil !!');
             setState(() {
               _isSubmitting = false;
             });
+            _resetInputs(); // Reset inputan setelah permit disubmit
           } else if (state is PermitFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            showErrorFlushbar(context, state.message);
             setState(() {
               _isSubmitting = false;
             });
@@ -222,11 +235,20 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
                   ),
                   const SizedBox(height: 16),
                   if (_selectedPermitType == 'Sakit')
-                    ElevatedButton(
-                      onPressed: _pickDocument,
-                      child: Text(_selectedDocument != null
-                          ? 'Dokumen Terpilih'
-                          : 'Unggah Dokumen'),
+                    Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: _pickDocument,
+                          child: Text(_selectedDocument != null
+                              ? 'Dokumen Terpilih: ${_selectedDocument!.path.split('/').last}'
+                              : 'Unggah Dokumen'),
+                        ),
+                        if (_selectedDocument != null)
+                          ElevatedButton(
+                            onPressed: _removeDocument,
+                            child: const Text('Hapus Dokumen'),
+                          ),
+                      ],
                     ),
                   const SizedBox(height: 16),
                   GestureDetector(
@@ -273,6 +295,7 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
     );
   }
 }
+
 
 
 

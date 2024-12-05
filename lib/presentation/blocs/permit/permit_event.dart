@@ -28,7 +28,7 @@ class SubmitPermitEvent extends PermitEvent {
     required this.tanggalMulai,
     required this.tanggalAkhir,
     this.dokumen,
-    required int idPegawai, // Dokumen opsional, bisa null
+    // required int idPegawai, // Dokumen opsional, bisa null
   });
 
   // @override
