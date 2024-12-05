@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'register_event.dart';
 import 'register_state.dart';
 import 'package:dio/dio.dart';
+import 'package:presensia/core/utils/notification_repository.dart';
 
 class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   final RegisterUseCase _registerUseCase;
@@ -78,6 +79,13 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
       final response = await _registerImageUseCase.execute(
         idPegawai: idPegawai,
         files: event.files,
+      );
+
+      // Print id_pegawai jika success
+      print('Success! id_pegawai: $idPegawai');
+      NotificationRepository.showNotification(
+        'Pendaftaran Gambar',
+        'Images uploaded successfully!',
       );
 
       emit(RegisterImageSuccess(
