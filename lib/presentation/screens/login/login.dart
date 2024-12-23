@@ -43,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
     if (isRegistered) {
       // Jika registrasi berhasil, tampilkan Flushbar sukses
       showSuccessFlushbar(
-          context, 'Pendaftaran berhasil! Selamat datang di aplikasi!');
+          context, 'Pendaftaran Sedang Diproses!, Harap Ditunggu');
 
       // Setelah Flushbar ditampilkan, reset status registrasi
       prefs.setBool('isRegistered', false);
@@ -95,209 +95,213 @@ class _LoginPageState extends State<LoginPage> {
       },
       builder: (context, state) {
         return Scaffold(
-          body: Center(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const SizedBox(height: 40),
-                    Image.asset(
-                      'images/logo.png',
-                      width: 100.0,
-                      height: 100.0,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.error),
-                    ),
-                    const SizedBox(height: 20),
-                    RichText(
-                      text: const TextSpan(
-                        text: 'Selamat Datang 👋\nDi ',
-                        style: TextStyle(
-                          fontSize: 33.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+          body: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const SizedBox(height: 40),
+                      Image.asset(
+                        'images/logo.png',
+                        width: 100.0,
+                        height: 100.0,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.error),
+                      ),
+                      const SizedBox(height: 20),
+                      RichText(
+                        text: const TextSpan(
+                          text: 'Selamat Datang 👋\nDi ',
+                          style: TextStyle(
+                            fontSize: 33.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: 'Presensia',
+                              style: TextStyle(color: Colors.blue),
+                            ),
+                          ],
                         ),
-                        children: <TextSpan>[
-                          TextSpan(
-                            text: 'Presensia',
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Silahkan Login untuk melanjutkan',
+                        style: TextStyle(fontSize: 16.0, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 30),
+                      // Nomor Pegawai TextField
+                      TextField(
+                        controller: _noPegawaiController,
+                        cursorColor: Colors.blue,
+                        enabled: !(state is LoginLoading),
+                        decoration: InputDecoration(
+                          labelText: 'Nomor Pegawai',
+                          labelStyle: const TextStyle(color: Colors.grey),
+                          floatingLabelStyle:
+                              const TextStyle(color: Colors.blue),
+                          errorText: _noPegawaiError, // Tampilkan error
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Colors.blue, width: 2.0),
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Password TextField
+                      TextField(
+                        controller: _passwordController,
+                        cursorColor: Colors.blue,
+                        obscureText: _isObscure,
+                        enabled: !(state is LoginLoading),
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          labelStyle: const TextStyle(color: Colors.grey),
+                          floatingLabelStyle:
+                              const TextStyle(color: Colors.blue),
+                          errorText: _passwordError, // Tampilkan error
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Colors.blue, width: 2.0),
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isObscure
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isObscure = !_isObscure;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: () {
+                            // Handle forgot password
+                          },
+                          child: const Text(
+                            'Lupa password?',
                             style: TextStyle(color: Colors.blue),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      // Login Button with full width
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: state is LoginLoading
+                              ? null
+                              : () {
+                                  final noPegawai =
+                                      _noPegawaiController.text.trim();
+                                  final password =
+                                      _passwordController.text.trim();
+
+                                  // Validasi input
+                                  if (noPegawai.isEmpty) {
+                                    setState(() {
+                                      _noPegawaiError =
+                                          'Nomor Pegawai tidak boleh kosong';
+                                      _passwordError = null;
+                                    });
+                                    return;
+                                  }
+
+                                  if (int.tryParse(noPegawai) == null) {
+                                    setState(() {
+                                      _noPegawaiError =
+                                          'Nomor Pegawai harus berupa angka';
+                                      _passwordError = null;
+                                    });
+                                    return;
+                                  }
+
+                                  if (password.isEmpty) {
+                                    setState(() {
+                                      _passwordError =
+                                          'Password tidak boleh kosong';
+                                      _noPegawaiError = null;
+                                    });
+                                    return;
+                                  }
+
+                                  if (password.length < 6) {
+                                    setState(() {
+                                      _passwordError =
+                                          'Password minimal 6 karakter';
+                                      _noPegawaiError = null;
+                                    });
+                                    return;
+                                  }
+
+                                  setState(() {
+                                    _noPegawaiError = null;
+                                    _passwordError = null;
+                                  });
+
+                                  context.read<LoginBloc>().add(
+                                        LoginButtonPressed(
+                                          noPegawai: noPegawai,
+                                          password: password,
+                                        ),
+                                      );
+                                },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.all(15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            backgroundColor: Colors.blue,
+                          ),
+                          child: state is LoginLoading
+                              ? const CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                )
+                              : const Text(
+                                  'Masuk',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text("Belum punya akun?"),
+                          TextButton(
+                            onPressed: () {
+                              context.go('/register');
+                            },
+                            child: const Text(
+                              "Daftar Disini",
+                              style: TextStyle(color: Colors.blue),
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Silahkan Login untuk melanjutkan',
-                      style: TextStyle(fontSize: 16.0, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 30),
-                    // Nomor Pegawai TextField
-                    TextField(
-                      controller: _noPegawaiController,
-                      cursorColor: Colors.blue,
-                      enabled: !(state is LoginLoading),
-                      decoration: InputDecoration(
-                        labelText: 'Nomor Pegawai',
-                        labelStyle: const TextStyle(color: Colors.grey),
-                        floatingLabelStyle: const TextStyle(color: Colors.blue),
-                        errorText: _noPegawaiError, // Tampilkan error
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              const BorderSide(color: Colors.blue, width: 2.0),
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    // Password TextField
-                    TextField(
-                      controller: _passwordController,
-                      cursorColor: Colors.blue,
-                      obscureText: _isObscure,
-                      enabled: !(state is LoginLoading),
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        labelStyle: const TextStyle(color: Colors.grey),
-                        floatingLabelStyle: const TextStyle(color: Colors.blue),
-                        errorText: _passwordError, // Tampilkan error
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              const BorderSide(color: Colors.blue, width: 2.0),
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _isObscure
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _isObscure = !_isObscure;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton(
-                        onPressed: () {
-                          // Handle forgot password
-                        },
-                        child: const Text(
-                          'Lupa password?',
-                          style: TextStyle(color: Colors.blue),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // Login Button with full width
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: state is LoginLoading
-                            ? null
-                            : () {
-                                final noPegawai =
-                                    _noPegawaiController.text.trim();
-                                final password =
-                                    _passwordController.text.trim();
-
-                                // Validasi input
-                                if (noPegawai.isEmpty) {
-                                  setState(() {
-                                    _noPegawaiError =
-                                        'Nomor Pegawai tidak boleh kosong';
-                                    _passwordError = null;
-                                  });
-                                  return;
-                                }
-
-                                if (int.tryParse(noPegawai) == null) {
-                                  setState(() {
-                                    _noPegawaiError =
-                                        'Nomor Pegawai harus berupa angka';
-                                    _passwordError = null;
-                                  });
-                                  return;
-                                }
-
-                                if (password.isEmpty) {
-                                  setState(() {
-                                    _passwordError =
-                                        'Password tidak boleh kosong';
-                                    _noPegawaiError = null;
-                                  });
-                                  return;
-                                }
-
-                                if (password.length < 6) {
-                                  setState(() {
-                                    _passwordError =
-                                        'Password minimal 6 karakter';
-                                    _noPegawaiError = null;
-                                  });
-                                  return;
-                                }
-
-                                setState(() {
-                                  _noPegawaiError = null;
-                                  _passwordError = null;
-                                });
-
-                                context.read<LoginBloc>().add(
-                                      LoginButtonPressed(
-                                        noPegawai: noPegawai,
-                                        password: password,
-                                      ),
-                                    );
-                              },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.all(15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          backgroundColor: Colors.blue,
-                        ),
-                        child: state is LoginLoading
-                            ? const CircularProgressIndicator(
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              )
-                            : const Text(
-                                'Masuk',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text("Belum punya akun?"),
-                        TextButton(
-                          onPressed: () {
-                            context.go('/register');
-                          },
-                          child: const Text(
-                            "Daftar Disini",
-                            style: TextStyle(color: Colors.blue),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

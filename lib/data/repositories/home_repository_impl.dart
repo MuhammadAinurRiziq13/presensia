@@ -1,4 +1,5 @@
 import '../datasources/home_api_datasource.dart';
+import '../../domain/entities/jatah_pegawai.dart';
 import '../../domain/entities/attendance_entity.dart';
 import '../../domain/repositories/home_repository.dart';
 import '../../domain/entities/pegawai.dart';
@@ -39,5 +40,31 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       print('Error fetching user: ${e.toString()}');
       rethrow;
     }
+  }
+
+  @override
+  Future<JatahPegawaiEntity> getRemainingQuota(int idPegawai) async {
+    try {
+      final model = await _attendanceApiDataSource.getRemainingQuota(idPegawai);
+      return JatahPegawaiEntity(
+        idJatah: model.idJatah,
+        idPegawai: model.idPegawai,
+        jatahSakit: model.jatahSakit,
+        jatahCuti: model.jatahCuti,
+        sisaSakit: model.sisaSakit,
+        sisaCuti: model.sisaCuti,
+        tahun: model.tahun,
+      );
+    } catch (e) {
+      throw Exception('Error in repository: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<AttendanceEntity> updateWaktuKeluar({
+    required int idAbsensi,
+  }) async {
+    final model = await _attendanceApiDataSource.updateWaktuKeluar(idAbsensi);
+    return AttendanceEntity.fromModel(model);
   }
 }

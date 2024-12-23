@@ -1,47 +1,69 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'permit_event.dart';
 import 'permit_state.dart';
-import '../../../data/repositories/permit_repository.dart';
+import 'package:presensia/domain/usecases/permit_usecase.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class PermitBloc extends Bloc<PermitEvent, PermitState> {
-  final PermitRepository repository;
+class PermitsBloc extends Bloc<PermitEvent, PermitState> {
+  final PermitUseCase permitUseCase;
 
-  PermitBloc(this.repository) : super(PermitInitial()) {
-    on<FetchPermits>((event, emit) async {
-      emit(PermitLoading());
-      try {
-        final permits = await repository.fetchPermits();
-        emit(PermitLoaded(permits));
-      } catch (e) {
-        emit(PermitError(e.toString()));
+  PermitsBloc(this.permitUseCase) : super(PermitInitialState()) {
+    on<GetPermitsEvent>(_onGetPermitsButtonPressed);
+    on<SubmitPermitEvent>(_onSubmitPermit); // Handler untuk submit izin
+  }
+
+  Future<void> _onGetPermitsButtonPressed(
+    GetPermitsEvent event,
+    Emitter<PermitState> emit,
+  ) async {
+    emit(PermitLoadingState());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final idPegawai = prefs.getInt('id_pegawai') ?? 0;
+
+      if (idPegawai == 0) {
+        emit(PermitFailure("Id Pegawai not found."));
+        return;
       }
-    });
 
-    on<CreatePermit>((event, emit) async {
-      try {
-        await repository.createPermit(event.permit);
-        add(FetchPermits()); // Refresh data
-      } catch (e) {
-        emit(PermitError(e.toString()));
-      }
-    });
+      // Fetch user data
+      final permits = await permitUseCase.execute(idPegawai);
 
-    on<ApprovePermit>((event, emit) async {
-      try {
-        await repository.approvePermit(event.id);
-        add(FetchPermits());
-      } catch (e) {
-        emit(PermitError(e.toString()));
-      }
-    });
+      emit(PermitSuccess(permits: permits));
+    } catch (e) {
+      emit(PermitFailure("Error fetching data: ${e.toString()}"));
+    }
+  }
 
-    on<RejectPermit>((event, emit) async {
-      try {
-        await repository.rejectPermit(event.id);
-        add(FetchPermits());
-      } catch (e) {
-        emit(PermitError(e.toString()));
+  Future<void> _onSubmitPermit(
+    SubmitPermitEvent event,
+    Emitter<PermitState> emit,
+  ) async {
+    emit(PermitLoadingState());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final dokumen = event.jenisIzin == 'Sakit' ? event.dokumen : null;
+
+      final idPegawai = prefs.getInt('id_pegawai') ?? 0;
+
+      final permit = await permitUseCase.submitPermit(
+        idPegawai: idPegawai,
+        jenisIzin: event.jenisIzin,
+        keterangan: event.keterangan,
+        tanggalMulai: event.tanggalMulai,
+        tanggalAkhir: event.tanggalAkhir,
+        dokumen: dokumen,
+      );
+
+      emit(PermitSubmittedState(permit));
+    } catch (e) {
+      if (e is DioException) {
+        emit(PermitFailure(e.response?.data['message'] ?? 'permit failed'));
+      } else {
+        emit(PermitFailure("Terjadi kesalahan, coba lagi nanti."));
       }
-    });
+    }
   }
 }

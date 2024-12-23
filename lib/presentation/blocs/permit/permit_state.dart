@@ -1,28 +1,37 @@
 import 'package:equatable/equatable.dart';
-import '../../../data/models/permit_model.dart';
+import 'package:presensia/domain/entities/permit.dart';
 
 abstract class PermitState extends Equatable {
   @override
   List<Object?> get props => [];
 }
 
-class PermitInitial extends PermitState {}
+class PermitInitialState extends PermitState {}
 
-class PermitLoading extends PermitState {}
+class PermitLoadingState extends PermitState {}
 
-class PermitLoaded extends PermitState {
-  final List<Permit> permits;
+class PermitSuccess extends PermitState {
+  final List<PermitEntity> permits;
 
-  PermitLoaded(this.permits);
+  PermitSuccess({required this.permits});
 
   @override
   List<Object?> get props => [permits];
 }
 
-class PermitError extends PermitState {
+class PermitSubmittedState extends PermitState {
+  final PermitEntity permit;
+
+  PermitSubmittedState(this.permit);
+
+  @override
+  List<Object?> get props => [permit];
+}
+
+class PermitFailure extends PermitState {
   final String message;
 
-  PermitError(this.message);
+  PermitFailure(this.message);
 
   @override
   List<Object?> get props => [message];

@@ -1,36 +1,42 @@
 import 'package:equatable/equatable.dart';
-import '../../../data/models/permit_model.dart';
+import 'dart:io';
 
 abstract class PermitEvent extends Equatable {
   @override
   List<Object?> get props => [];
 }
 
-class FetchPermits extends PermitEvent {}
+class GetPermitsEvent extends PermitEvent {
+  final int idPegawai;
 
-class CreatePermit extends PermitEvent {
-  final Permit permit;
-
-  CreatePermit(this.permit);
+  GetPermitsEvent({required this.idPegawai});
 
   @override
-  List<Object?> get props => [permit];
+  List<Object?> get props => [idPegawai];
 }
 
-class ApprovePermit extends PermitEvent {
-  final int id;
+class SubmitPermitEvent extends PermitEvent {
+  final String jenisIzin;
+  final String keterangan;
+  final DateTime tanggalMulai;
+  final DateTime tanggalAkhir;
+  final File? dokumen; // Dokumen opsional, bisa null
 
-  ApprovePermit(this.id);
+  SubmitPermitEvent({
+    required this.jenisIzin,
+    required this.keterangan,
+    required this.tanggalMulai,
+    required this.tanggalAkhir,
+    this.dokumen,
+    // required int idPegawai, // Dokumen opsional, bisa null
+  });
 
-  @override
-  List<Object?> get props => [id];
-}
-
-class RejectPermit extends PermitEvent {
-  final int id;
-
-  RejectPermit(this.id);
-
-  @override
-  List<Object?> get props => [id];
+  // @override
+  // List<Object?> get props => [
+  //       jenisIzin,
+  //       keterangan,
+  //       tanggalMulai,
+  //       tanggalAkhir,
+  //       dokumen ?? '', // Dokumen bisa null
+  //     ];
 }

@@ -27,3 +27,25 @@ class RegisterFailure extends RegisterState {
   @override
   List<Object?> get props => [errorMessage];
 }
+
+// Tambahkan state untuk upload gambar
+class RegisterImageLoading
+    extends RegisterState {} // State ketika upload gambar sedang dilakukan
+
+class RegisterImageSuccess extends RegisterState {
+  final Map<String, dynamic> response;
+
+  RegisterImageSuccess(this.response);
+
+  @override
+  List<Object?> get props => [response];
+}
+
+class RegisterImageFailure extends RegisterState {
+  final String errorMessage;
+
+  RegisterImageFailure(this.errorMessage) : assert(errorMessage.isNotEmpty);
+
+  @override
+  List<Object?> get props => [errorMessage];
+}

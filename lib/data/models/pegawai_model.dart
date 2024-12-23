@@ -5,7 +5,7 @@ class PegawaiModel extends PegawaiEntity {
     int? id,
     int? idLevel,
     String? namaPegawai,
-    required int noPegawai,
+    required String noPegawai,
     int? boss,
     String? jabatan,
     required String alamat,
@@ -28,7 +28,7 @@ class PegawaiModel extends PegawaiEntity {
       id: json['id_pegawai'] as int?,
       idLevel: json['id_level'] as int?,
       namaPegawai: json['nama_pegawai'] ?? '',
-      noPegawai: json['no_pegawai'] ?? 0,
+      noPegawai: json['no_pegawai']?.toString() ?? '', // Konversi ke String
       boss: json['supervisor'] as int?,
       jabatan: json['jabatan'] ?? '',
       alamat: json['alamat'] ?? '',
