@@ -43,33 +43,29 @@ class PermitApiDataSource {
     if (idPegawai <= 0) {
       throw Exception("Id Pegawai tidak valid");
     }
-    try {
-      final formData = FormData.fromMap({
-        'id_pegawai': idPegawai.toString(),
-        'jenis_izin': jenisIzin,
-        'keterangan': keterangan,
-        'tanggal_mulai': tanggalMulai.toIso8601String(),
-        'tanggal_akhir': tanggalAkhir.toIso8601String(),
-        if (dokumen != null) // Hanya kirim dokumen jika ada
-          'dokumen': await MultipartFile.fromFile(
-            dokumen.path,
-            filename: dokumen.path.split('/').last,
-          ),
-      });
+    final formData = FormData.fromMap({
+      'id_pegawai': idPegawai.toString(),
+      'jenis_izin': jenisIzin,
+      'keterangan': keterangan,
+      'tanggal_mulai': tanggalMulai.toIso8601String(),
+      'tanggal_akhir': tanggalAkhir.toIso8601String(),
+      if (dokumen != null) // Hanya kirim dokumen jika ada
+        'dokumen': await MultipartFile.fromFile(
+          dokumen.path,
+          filename: dokumen.path.split('/').last,
+        ),
+    });
 
-      final response = await _dioClient.post(
-        '/permit/store',
-        data: formData,
-        options: Options(contentType: 'multipart/form-data'),
-      );
+    final response = await _dioClient.post(
+      '/permit/store',
+      data: formData,
+      options: Options(contentType: 'multipart/form-data'),
+    );
 
-      if (response.statusCode == 200) {
-        return PermitModel.fromJson(response.data['data']);
-      } else {
-        throw Exception(response.data['message'] ?? 'Failed to submit permit');
-      }
-    } catch (e) {
-      throw Exception('Error submitting permit datasource: ${e.toString()}');
+    if (response.statusCode == 200) {
+      return PermitModel.fromJson(response.data['data']);
+    } else {
+      throw Exception(response.data['message'] ?? 'Failed to submit permit');
     }
   }
 }

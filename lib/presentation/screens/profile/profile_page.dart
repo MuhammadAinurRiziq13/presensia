@@ -6,7 +6,6 @@ import 'profile_detail_page.dart';
 import 'help_page.dart';
 import 'privacy_policy_page.dart';
 import 'terms_and_conditions_page.dart';
-import 'edit_profile_picture.dart';
 import '../../../presentation/widgets/bottom_navigation.dart';
 import 'package:presensia/presentation/blocs/profile/profile_bloc.dart';
 import 'package:presensia/presentation/blocs/profile/profile_event.dart';
@@ -14,6 +13,7 @@ import 'package:presensia/presentation/blocs/profile/profile_state.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -23,8 +23,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  File? _imageFile;
-
   @override
   void initState() {
     super.initState();
@@ -33,21 +31,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void _fetchAllData() {
     context.read<ProfileBloc>().add(FetchAllDataEvent());
-  }
-
-  void _showEditProfilePicture() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditProfilePicturePage(
-          onImagePicked: (File? image) {
-            setState(() {
-              _imageFile = image;
-            });
-          },
-        ),
-      ),
-    );
   }
 
   void _showLogoutDialog(BuildContext context) {
@@ -114,30 +97,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     CircleAvatar(
                       radius: 60,
-                      backgroundImage: _imageFile != null
-                          ? FileImage(_imageFile!)
-                          : const NetworkImage(
-                                  'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg')
-                              as ImageProvider,
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: _showEditProfilePicture,
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.blue,
-                          ),
-                          child: const Icon(
-                            Icons.edit,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                      backgroundImage: NetworkImage(
+                              'https://i.pinimg.com/236x/f9/51/b3/f951b38701e4ce78644595c7a6022c27.jpg')
+                          as ImageProvider,
                     ),
                   ],
                 ),

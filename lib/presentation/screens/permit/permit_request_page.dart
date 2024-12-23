@@ -33,6 +33,23 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
       context: context,
       firstDate: DateTime(2020),
       lastDate: DateTime(2025),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.blue, // Warna utama kalender
+              onPrimary: Colors.white, // Warna teks di atas warna utama
+              onSurface: Colors.blue, // Warna teks di atas permukaan
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.blue, // Warna tombol teks
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (pickedDateRange != null && pickedDateRange != _dateRange) {
       setState(() {
@@ -138,24 +155,28 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Ajukan Perizinan',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: BlocListener<PermitsBloc, PermitState>(
         listener: (context, state) {
           if (state is PermitSubmittedState) {
-            showSuccessFlushbar(context, 'Presensi berhasil !!');
+            showSuccessFlushbar(context, 'Pengajuan berhasil !!');
             setState(() {
               _isSubmitting = false;
             });
-            _resetInputs(); // Reset inputan setelah permit disubmit
+            _resetInputs();
           } else if (state is PermitFailure) {
             showErrorFlushbar(context, state.message);
             setState(() {
@@ -168,124 +189,129 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
             padding: const EdgeInsets.all(16.0),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12.0),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.blue[50]!,
+                    Colors.blue[100]!,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20.0),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
+                    color: Colors.blue.withOpacity(0.2),
+                    blurRadius: 15,
+                    offset: const Offset(0, 10),
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Tipe perizinan
+                  // Permit Type Section
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(10.0),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
                     ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0),
+                        horizontal: 16.0, vertical: 12.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           "Jenis Perizinan:",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
                         ),
-                        RadioListTile<String>(
-                          title: const Text('Sakit'),
-                          value: 'Sakit',
-                          groupValue: _selectedPermitType,
-                          onChanged: (String? value) {
-                            setState(() {
-                              _selectedPermitType = value!;
-                            });
-                          },
-                        ),
-                        RadioListTile<String>(
-                          title: const Text('Cuti'),
-                          value: 'Cuti',
-                          groupValue: _selectedPermitType,
-                          onChanged: (String? value) {
-                            setState(() {
-                              _selectedPermitType = value!;
-                              _selectedDocument = null; // Reset dokumen
-                            });
-                          },
-                        ),
-                        RadioListTile<String>(
-                          title: const Text('WFA (Work From Anywhere)'),
-                          value: 'WFA',
-                          groupValue: _selectedPermitType,
-                          onChanged: (String? value) {
-                            setState(() {
-                              _selectedPermitType = value!;
-                              _selectedDocument = null; // Reset dokumen
-                            });
-                          },
-                        ),
+                        _buildRadioTile('Sakit', 'Sakit'),
+                        _buildRadioTile('Cuti', 'Cuti'),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
+
+                  // Document Upload for Sick Leave
                   if (_selectedPermitType == 'Sakit')
                     Column(
                       children: [
-                        ElevatedButton(
-                          onPressed: _pickDocument,
-                          child: Text(_selectedDocument != null
-                              ? 'Dokumen Terpilih: ${_selectedDocument!.path.split('/').last}'
-                              : 'Unggah Dokumen'),
-                        ),
-                        if (_selectedDocument != null)
-                          ElevatedButton(
-                            onPressed: _removeDocument,
-                            child: const Text('Hapus Dokumen'),
-                          ),
+                        _buildDocumentUploadButton(),
                       ],
                     ),
+
                   const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () => _selectDateRange(context),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        _dateRange == null
-                            ? 'Pilih Tanggal'
-                            : '${DateFormat('dd MMM yyyy').format(_dateRange!.start)} - ${DateFormat('dd MMM yyyy').format(_dateRange!.end)}',
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
+
+                  // Date Range Picker
+                  _buildDateRangePicker(),
+
                   const SizedBox(height: 16),
+
+                  // Remarks TextField
                   TextField(
                     controller: _remarksController,
                     decoration: InputDecoration(
                       labelText: 'Keterangan',
+                      labelStyle: TextStyle(color: Colors.blue),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
+                        borderRadius: BorderRadius.circular(15.0),
+                        borderSide: BorderSide(color: Colors.blue!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                        borderSide: BorderSide(color: Colors.blue!, width: 2),
                       ),
                     ),
+                    cursorColor: Colors.blue,
                   ),
+
                   const SizedBox(height: 20),
-                  if (_isSubmitting)
-                    const Center(child: CircularProgressIndicator())
-                  else
-                    ElevatedButton(
-                      onPressed: _submitPermit,
-                      child: const Text('Ajukan Permohonan'),
+
+                  // Submit Button
+                  ElevatedButton(
+                    onPressed: _isSubmitting
+                        ? null
+                        : _submitPermit, // Disable button while submitting
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _isSubmitting
+                          ? Colors.white
+                          : Colors.blue, // Change color when loading
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
                     ),
+                    child: _isSubmitting
+                        ? SizedBox(
+                            width:
+                                24, // Set a fixed size for the progress indicator
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth:
+                                  3, // Adjust stroke width for visibility
+                            ),
+                          )
+                        : const Text(
+                            'Ajukan Permohonan',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
                 ],
               ),
             ),
@@ -294,8 +320,112 @@ class _PermitRequestPageState extends State<PermitRequestPage> {
       ),
     );
   }
-}
 
+  // Helper method for radio tiles
+  Widget _buildRadioTile(String value, String title) {
+    return Theme(
+      data: ThemeData(
+        unselectedWidgetColor: Colors.blue,
+        radioTheme: RadioThemeData(
+          fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+            if (states.contains(MaterialState.selected)) {
+              return Colors.blue!;
+            }
+            return Colors.blue!.withOpacity(0.5);
+          }),
+        ),
+      ),
+      child: RadioListTile<String>(
+        title: Text(
+          title,
+          style: TextStyle(color: Colors.blue),
+        ),
+        value: value,
+        groupValue: _selectedPermitType,
+        onChanged: (String? newValue) {
+          setState(() {
+            _selectedPermitType = newValue!;
+            if (value != 'Sakit') {
+              _selectedDocument = null;
+            }
+          });
+        },
+      ),
+    );
+  }
+
+  // Helper method for document upload
+  Widget _buildDocumentUploadButton() {
+    return Column(
+      children: [
+        ElevatedButton(
+          onPressed: _pickDocument,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+          ),
+          child: Text(
+            _selectedDocument != null
+                ? 'Dokumen: ${_selectedDocument!.path.split('/').last}'
+                : 'Unggah Dokumen',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        if (_selectedDocument != null)
+          TextButton(
+            onPressed: _removeDocument,
+            child: Text(
+              'Hapus Dokumen',
+              style: TextStyle(color: Colors.blue),
+            ),
+          ),
+      ],
+    );
+  }
+
+  // Helper method for date range picker
+  Widget _buildDateRangePicker() {
+    return GestureDetector(
+      onTap: () => _selectDateRange(context),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.blue.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(Icons.calendar_today, color: Colors.blue),
+            const SizedBox(width: 10),
+            Text(
+              _dateRange == null
+                  ? 'Pilih Tanggal'
+                  : '${DateFormat('dd MMM yyyy').format(_dateRange!.start)} - ${DateFormat('dd MMM yyyy').format(_dateRange!.end)}',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.blue,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 
 

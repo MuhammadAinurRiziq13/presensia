@@ -60,10 +60,9 @@ class PermitsBloc extends Bloc<PermitEvent, PermitState> {
       emit(PermitSubmittedState(permit));
     } catch (e) {
       if (e is DioException) {
-        final errorMessage = e.response?.data ?? 'Unknown error';
-        emit(PermitFailure("Error submitting permit bloc: $errorMessage"));
+        emit(PermitFailure(e.response?.data['message'] ?? 'permit failed'));
       } else {
-        emit(PermitFailure("Error submitting permit bloc: ${e.toString()}"));
+        emit(PermitFailure("Terjadi kesalahan, coba lagi nanti."));
       }
     }
   }

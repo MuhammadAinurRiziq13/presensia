@@ -5,5 +5,6 @@ abstract class PresensiRepository {
   Future<AttendanceEntity> storePresensi({
     required int idPegawai,
     required File fotoAbsen,
+    required String lokasiAbsen,
   });
 }

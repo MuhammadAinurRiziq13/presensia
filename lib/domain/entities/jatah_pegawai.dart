@@ -3,18 +3,18 @@ import 'package:equatable/equatable.dart';
 class JatahPegawaiEntity extends Equatable {
   final int idJatah;
   final int idPegawai;
-  final int jatahWfa;
+  final int jatahSakit;
   final int jatahCuti;
-  final int sisaWfa;
+  final int sisaSakit;
   final int sisaCuti;
   final int tahun;
 
   const JatahPegawaiEntity({
     required this.idJatah,
     required this.idPegawai,
-    required this.jatahWfa,
+    required this.jatahSakit,
     required this.jatahCuti,
-    required this.sisaWfa,
+    required this.sisaSakit,
     required this.sisaCuti,
     required this.tahun,
   });
@@ -23,9 +23,9 @@ class JatahPegawaiEntity extends Equatable {
   List<Object?> get props => [
         idJatah,
         idPegawai,
-        jatahWfa,
+        jatahSakit,
         jatahCuti,
-        sisaWfa,
+        sisaSakit,
         sisaCuti,
         tahun,
       ];

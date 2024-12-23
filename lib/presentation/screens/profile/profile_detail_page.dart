@@ -144,7 +144,7 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
         }
       },
       builder: (context, state) {
-        final isLoading = state is ProfilePasswordLoading;
+        final isLoading = state is ProfileLoading;
         return Column(
           children: [
             _buildPasswordTextField(
@@ -277,6 +277,7 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
             _buildProfileDetailRow('Nama Pegawai    :', namaPegawai),
             _buildProfileDetailRow('Nomor Pegawai   :', noPegawai),
             _buildProfileDetailRow('Jabatan Pegawai :', jabatanPegawai),
+            _buildProfileDetailRow('Password              :', '***********'),
           ],
         ),
       ),

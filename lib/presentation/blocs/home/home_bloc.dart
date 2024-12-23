@@ -53,13 +53,22 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
           DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.now());
 
       print(
-          'Quota Data in Bloc: sisaWfa=${quota.sisaWfa}, sisaCuti=${quota.sisaCuti}');
+          'Quota Data in Bloc: sisaSakit=${quota.sisaSakit}, sisaCuti=${quota.sisaCuti}');
+
+      if (attendance.isNotEmpty) {
+        // Mengambil idAbsen dari attendance pertama
+        int idAbsenFirst = attendance.first.idAbsen;
+
+        // Menyimpan idAbsen yang pertama ke SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('id_absensi', idAbsenFirst);
+      }
 
       emit(AttendanceAndUserSuccess(
         user: user,
         attendance: attendance,
         currentDate: today,
-        sisaWfa: quota.sisaWfa, // Pastikan ini tidak null
+        sisaSakit: quota.sisaSakit, // Pastikan ini tidak null
         sisaCuti: quota.sisaCuti, // Pastikan ini tidak null
       ));
     } catch (e) {

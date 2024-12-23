@@ -12,15 +12,11 @@ class RegisterUseCase {
     required String noHp,
     required String password,
   }) async {
-    try {
-      return await _authRepository.register(
-        noPegawai: noPegawai,
-        alamat: alamat,
-        noHp: noHp,
-        password: password,
-      );
-    } catch (e) {
-      throw Exception('Register UseCase Error: ${e.toString()}');
-    }
+    return await _authRepository.register(
+      noPegawai: noPegawai,
+      alamat: alamat,
+      noHp: noHp,
+      password: password,
+    );
   }
 }

@@ -49,9 +49,9 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       return JatahPegawaiEntity(
         idJatah: model.idJatah,
         idPegawai: model.idPegawai,
-        jatahWfa: model.jatahWfa,
+        jatahSakit: model.jatahSakit,
         jatahCuti: model.jatahCuti,
-        sisaWfa: model.sisaWfa,
+        sisaSakit: model.sisaSakit,
         sisaCuti: model.sisaCuti,
         tahun: model.tahun,
       );

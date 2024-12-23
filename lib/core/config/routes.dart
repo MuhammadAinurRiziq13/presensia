@@ -27,7 +27,6 @@ import 'package:presensia/presentation/screens/permit/permit_request_page.dart';
 import 'package:presensia/presentation/screens/history/history_page.dart';
 import 'package:presensia/presentation/screens/history/permit_history_page.dart';
 import 'package:presensia/presentation/screens/presensi/presensi_page.dart';
-import 'package:presensia/presentation/screens/app.dart';
 import 'package:presensia/presentation/blocs/register/register_bloc.dart';
 import 'package:presensia/presentation/blocs/login/login_bloc.dart';
 import 'package:presensia/presentation/blocs/history/history_bloc.dart';

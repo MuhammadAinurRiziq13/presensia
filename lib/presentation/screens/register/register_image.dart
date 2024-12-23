@@ -67,40 +67,88 @@ class _RegisterImageState extends State<RegisterImage>
     }
   }
 
+  // Fungsi untuk mereset gambar
+  void _resetImages() {
+    setState(() {
+      _images.clear();
+      _imageIndex = 0;
+    });
+  }
+
   // Fungsi untuk menampilkan tombol ambil gambar
   Widget _buildCaptureButton() {
     return BlocConsumer<RegisterBloc, RegisterState>(
       listener: (context, state) {
         if (state is RegisterImageSuccess) {
-          // Setelah berhasil upload gambar, pindah ke halaman login
           context.go('/login');
         }
         if (state is RegisterImageFailure) {
-          // Jika gagal upload gambar, pindah ke halaman login
           context.go('/login');
         }
       },
       builder: (context, state) {
         bool isLoading = state is RegisterImageLoading;
-        return ElevatedButton(
-          onPressed: () async {
-            if (_images.length < 5) {
-              await _takePicture(); // Ambil foto jika kurang dari 5
-            } else {
-              // Kirim gambar ke server
-              context.read<RegisterBloc>().add(RegisterImageEvent(
-                    files: _images.map((image) => File(image.path)).toList(),
-                  ));
-              // Pindah halaman setelah gambar dikirim
-              SharedPreferences.getInstance().then((prefs) {
-                prefs.setBool('isRegistered', true);
-              });
-              context.go('/login');
-            }
-          },
-          child: isLoading
-              ? CircularProgressIndicator()
-              : Text(_images.length < 5 ? 'Capture Photo' : 'Submit Images'),
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Tombol Capture/Submit
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                elevation: 5,
+              ),
+              onPressed: () async {
+                if (_images.length < 5) {
+                  await _takePicture();
+                } else {
+                  context.read<RegisterBloc>().add(RegisterImageEvent(
+                        files:
+                            _images.map((image) => File(image.path)).toList(),
+                      ));
+                  SharedPreferences.getInstance().then((prefs) {
+                    prefs.setBool('isRegistered', true);
+                  });
+                  context.go('/login');
+                }
+              },
+              child: isLoading
+                  ? CircularProgressIndicator(color: Colors.white)
+                  : Text(
+                      _images.length < 5 ? 'Capture Photo' : 'Submit Images',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+            ),
+
+            // Tombol Reset (hanya tampil jika ada gambar)
+            if (_images.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      side: BorderSide(color: Colors.blue, width: 2),
+                    ),
+                    elevation: 3,
+                  ),
+                  onPressed: _resetImages,
+                  child: const Text(
+                    'Reset Photos',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+          ],
         );
       },
     );
@@ -110,31 +158,23 @@ class _RegisterImageState extends State<RegisterImage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Pendaftaran Foto"),
-        centerTitle: true,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.blue,
-                Colors.blueAccent,
-              ],
-            ),
-          ),
+        title: const Text(
+          "Pendaftaran Foto",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
+        centerTitle: true,
+        backgroundColor: Colors.blue,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
               const SizedBox(height: 20),
-              _buildCameraPreview(), // Menampilkan preview kamera
+              _buildCameraPreview(),
               const SizedBox(height: 20),
-              _buildProgressIndicator(), // Menampilkan progres pengambilan gambar
+              _buildProgressIndicator(),
               const SizedBox(height: 20),
-              _buildCaptureButton(), // Menampilkan tombol untuk mengambil gambar
+              _buildCaptureButton(),
             ],
           ),
         ),
@@ -165,7 +205,7 @@ class _RegisterImageState extends State<RegisterImage>
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: Colors.blue.withOpacity(0.8),
+                color: Colors.blue,
                 width: 3,
               ),
               boxShadow: [
@@ -176,19 +216,13 @@ class _RegisterImageState extends State<RegisterImage>
                   offset: const Offset(0, 10),
                 ),
               ],
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.blue.withOpacity(0.1),
-                  Colors.blueAccent.withOpacity(0.1),
-                ],
-              ),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Transform(
-                transform: Matrix4.rotationY(0), // Menonaktifkan efek mirror
+                // Menambahkan transformasi untuk mencerminkan kamera
+                transform:
+                    Matrix4.rotationY(3.14159), // Putar 180 derajat di sumbu Y
                 alignment: Alignment.center,
                 child: CameraPreview(_cameraController),
               ),
@@ -211,8 +245,8 @@ class _RegisterImageState extends State<RegisterImage>
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: Colors.grey[300],
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+              backgroundColor: Colors.white,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
               minHeight: 12,
             ),
           ),
@@ -220,7 +254,7 @@ class _RegisterImageState extends State<RegisterImage>
         const SizedBox(height: 10),
         Text(
           'Photo Progress: ${_images.length}/5',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Colors.blue,

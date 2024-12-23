@@ -10,7 +10,7 @@ class HistoryApiDataSource {
     try {
       // Kirim permintaan ke API
       final response = await _dioClient.get(
-        '/history',
+        '/presensi/history',
         queryParams: {'id_pegawai': idPegawai},
       );
 

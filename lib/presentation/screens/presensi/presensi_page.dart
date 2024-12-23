@@ -8,6 +8,8 @@ import 'package:presensia/presentation/blocs/presensi/presensi_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/flushbar_helper.dart';
 import 'package:go_router/go_router.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class PresensiPage extends StatefulWidget {
   const PresensiPage({super.key});
@@ -18,6 +20,78 @@ class PresensiPage extends StatefulWidget {
 
 class _PresensiPageState extends State<PresensiPage> {
   File? _image;
+  Position? _currentPosition;
+  String _address = 'Mengambil lokasi...';
+  final GeolocatorPlatform _geolocatorPlatform = GeolocatorPlatform.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  // Fungsi untuk mendapatkan lokasi saat ini
+  Future<void> _getCurrentLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() {
+          _address = 'Layanan lokasi dinonaktifkan.';
+        });
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission != LocationPermission.whileInUse &&
+            permission != LocationPermission.always) {
+          setState(() {
+            _address = 'Izin lokasi ditolak.';
+          });
+          return;
+        }
+      }
+
+      Position position = await Geolocator.getCurrentPosition();
+      setState(() {
+        _currentPosition = position;
+      });
+
+      _getAddressFromLatLng(position.latitude, position.longitude);
+    } catch (e) {
+      setState(() {
+        _address = 'Gagal mendapatkan lokasi: $e';
+      });
+    }
+  }
+
+  // Konversi koordinat ke alamat
+  Future<void> _getAddressFromLatLng(double latitude, double longitude) async {
+    try {
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(latitude, longitude);
+      Placemark place = placemarks.first;
+
+      String combinedAddress = [
+        place.street,
+        place.subLocality,
+        place.locality,
+        place.administrativeArea,
+        place.postalCode,
+        place.country
+      ].where((element) => element != null && element.isNotEmpty).join(', ');
+
+      setState(() {
+        _address =
+            combinedAddress.isEmpty ? 'Alamat tidak tersedia' : combinedAddress;
+      });
+    } catch (e) {
+      setState(() {
+        _address = 'Gagal mendapatkan alamat: $e';
+      });
+    }
+  }
 
   Future<void> _pickImage() async {
     try {
@@ -44,12 +118,21 @@ class _PresensiPageState extends State<PresensiPage> {
   }
 
   void _submitPresensi() {
-    if (_image != null) {
-      context.read<PresensiBloc>().add(SubmitPresensiEvent(fotoAbsen: _image!));
+    if (_image != null && _currentPosition != null) {
+      context.read<PresensiBloc>().add(
+            SubmitPresensiEvent(
+              fotoAbsen: _image!,
+              latitude: _currentPosition!.latitude,
+              longitude: _currentPosition!.longitude,
+              lokasiAbsen: _address,
+            ),
+          );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Harap ambil foto terlebih dahulu'),
+        SnackBar(
+          content: Text(_image == null
+              ? 'Harap ambil foto terlebih dahulu'
+              : 'Lokasi belum didapatkan'),
           backgroundColor: Colors.red,
         ),
       );
@@ -74,7 +157,7 @@ class _PresensiPageState extends State<PresensiPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
           onPressed: () {
-            GoRouter.of(context).go('/home'); // Navigasi menggunakan GoRouter
+            GoRouter.of(context).go('/home');
           },
         ),
       ),
@@ -86,7 +169,7 @@ class _PresensiPageState extends State<PresensiPage> {
             });
             GoRouter.of(context).go('/home');
           } else if (state is PresensiFailure) {
-            showErrorFlushbar(context, 'Presensi gagal, Coba Lagi !!');
+            showErrorFlushbar(context, state.errorMessage);
           }
         },
         builder: (context, state) {
@@ -98,7 +181,7 @@ class _PresensiPageState extends State<PresensiPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Header Section
+                    // Header Section (unchanged)
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -152,9 +235,49 @@ class _PresensiPageState extends State<PresensiPage> {
                       ),
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 16),
 
-                    // Image Preview Section
+                    // Lokasi Section (New)
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.location_on, color: Colors.blue[700]),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              _address,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[800],
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.refresh, color: Colors.blue[700]),
+                            onPressed: _getCurrentLocation,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Image Preview Section (mostly unchanged)
                     Container(
                       height: 400,
                       decoration: BoxDecoration(
@@ -176,8 +299,7 @@ class _PresensiPageState extends State<PresensiPage> {
                                 children: [
                                   Transform(
                                     alignment: Alignment.center,
-                                    transform: Matrix4.rotationY(
-                                        0), // Tidak ada rotasi
+                                    transform: Matrix4.rotationY(0),
                                     child: Image.file(
                                       _image!,
                                       fit: BoxFit.cover,
@@ -240,22 +362,20 @@ class _PresensiPageState extends State<PresensiPage> {
 
                     const SizedBox(height: 32),
 
-                    // Button Section
+                    // Button Section (mostly unchanged)
                     ElevatedButton(
                       onPressed: state is PresensiLoading
                           ? null
                           : _image == null
-                              ? _pickImage // Memanggil fungsi untuk mengambil foto jika gambar belum ada
-                              : _submitPresensi, // Kirim presensi jika gambar sudah ada
+                              ? _pickImage
+                              : _submitPresensi,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         backgroundColor: state is PresensiLoading
-                            ? Colors.grey // Set ke abu-abu saat loading
+                            ? Colors.grey
                             : _image == null
-                                ? Colors.blue[
-                                    700] // Warna untuk tombol "Ambil Foto Sekarang"
-                                : Colors.green[
-                                    600], // Warna untuk tombol "Kirim Presensi"
+                                ? Colors.blue[700]
+                                : Colors.green[600],
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -271,18 +391,16 @@ class _PresensiPageState extends State<PresensiPage> {
                               children: [
                                 Icon(
                                   _image == null
-                                      ? Icons
-                                          .camera_alt // Ikon untuk mengambil foto
-                                      : Icons
-                                          .check_circle, // Ikon untuk mengirim presensi
+                                      ? Icons.camera_alt
+                                      : Icons.check_circle,
                                   size: 24,
                                   color: Colors.white,
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
                                   _image == null
-                                      ? 'Ambil Foto Sekarang' // Teks jika gambar belum ada
-                                      : 'Kirim Presensi', // Teks jika gambar sudah ada
+                                      ? 'Ambil Foto Sekarang'
+                                      : 'Kirim Presensi',
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,

@@ -11,6 +11,7 @@ class PresensiApiDataSource {
   Future<AttendanceModel> storePresensi({
     required int idPegawai,
     required File fotoAbsen,
+    required String lokasiAbsen,
   }) async {
     if (idPegawai <= 0) {
       throw Exception("Id Pegawai tidak valid");
@@ -20,6 +21,7 @@ class PresensiApiDataSource {
       final formData = FormData.fromMap({
         'id_pegawai': idPegawai
             .toString(), // Kirim sebagai string jika backend mengharapkan string
+        'lokasi_absen': lokasiAbsen,
         'foto_absen': await MultipartFile.fromFile(
           fotoAbsen.path,
           filename: fotoAbsen.path.split('/').last,

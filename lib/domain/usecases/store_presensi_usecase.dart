@@ -10,10 +10,12 @@ class StorePresensiUseCase {
   Future<AttendanceEntity> execute({
     required int idPegawai,
     required File fotoAbsen,
+    required String lokasiAbsen,
   }) async {
     return await _repository.storePresensi(
       idPegawai: idPegawai,
       fotoAbsen: fotoAbsen,
+      lokasiAbsen: lokasiAbsen,
     );
   }
 }

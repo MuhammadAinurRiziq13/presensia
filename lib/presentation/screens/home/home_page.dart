@@ -289,7 +289,7 @@ class _HomePageState extends State<HomePage> {
                             ],
                           );
                         } else if (state is AttendanceAndUserSuccess) {
-                          final sisaWfa = state.sisaWfa.toString();
+                          final sisaSakit = state.sisaSakit.toString();
                           final sisaCuti = state.sisaCuti.toString();
 
                           return Column(
@@ -298,8 +298,8 @@ class _HomePageState extends State<HomePage> {
                                 children: [
                                   Expanded(
                                     child: _buildPresenceCard(
-                                      'Jatah WFA',
-                                      '$sisaWfa Hari',
+                                      'Jatah Sakit',
+                                      '$sisaSakit Hari',
                                       Icons.home,
                                     ),
                                   ),
@@ -345,9 +345,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      floatingActionButton: Builder(
-        builder: (context) {
-          // Membaca data id_absensi dari SharedPreferences dan mengonversi menjadi integer
+      floatingActionButton: BlocBuilder<AttendanceBloc, AttendanceState>(
+        builder: (context, state) {
+          // Membaca data id_absensi dari SharedPreferences
           Future<int?> getIdAbsensi() async {
             final prefs = await SharedPreferences.getInstance();
             return prefs.getInt('id_absensi');
@@ -356,17 +356,35 @@ class _HomePageState extends State<HomePage> {
           return FutureBuilder<int?>(
             future: getIdAbsensi(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                // Menampilkan indikator loading ketika data sedang dimuat
-                return const CircularProgressIndicator();
+              if (state is AttendanceLoading) {
+                return SizedBox(
+                  width: 65.0,
+                  height: 65.0,
+                  child: FloatingActionButton(
+                    onPressed: null, // FAB nonaktif saat loading
+                    backgroundColor:
+                        Colors.grey.shade300, // Warna FAB saat loading
+                    shape: const CircleBorder(),
+                    child: const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                    ),
+                    heroTag: 'fab-loading', // Tag unik untuk FAB saat loading
+                  ),
+                );
               } else if (snapshot.hasError) {
                 // Menangani kesalahan jika ada error dalam mengambil data
                 return const Icon(Icons.error);
-              } else {
+              } else if (state is AttendanceAndUserSuccess) {
+                // Ambil idAbsensi dari snapshot
                 int? idAbsensi = snapshot.data;
 
-                // Mengatur kondisi FAB berdasarkan id_absensi yang diambil
-                final isDisabled = idAbsensi != null;
+                // Ambil attendance dari state
+                final attendance = state.attendance;
+
+                // Kondisi tombol disabled
+                final isDisabled = (attendance.isNotEmpty &&
+                        attendance[0].waktuMasuk != null) ||
+                    (idAbsensi != null);
 
                 return SizedBox(
                   width: 65.0,
@@ -387,6 +405,9 @@ class _HomePageState extends State<HomePage> {
                     heroTag: 'fab-home', // Tag unik untuk FAB di halaman ini
                   ),
                 );
+              } else {
+                // Default jika state bukan AttendanceAndUserSuccess
+                return const SizedBox();
               }
             },
           );

@@ -55,7 +55,15 @@ class _HistoryPermitPageState extends State<HistoryPermitPage> {
                     baseColor: Colors.grey[300]!,
                     highlightColor: Colors.grey[100]!,
                     child: Column(
-                      children: List.generate(5, (index) => _buildLoadingRow()),
+                      children: List.generate(
+                        6,
+                        (index) => Column(
+                          children: [
+                            _buildLoadingRow(),
+                            SizedBox(height: 13), // Jarak ke bawah
+                          ],
+                        ),
+                      ),
                     ),
                   );
                 } else if (state is PermitSuccess) {
@@ -98,24 +106,23 @@ class _HistoryPermitPageState extends State<HistoryPermitPage> {
 
         // Status Color
         Color statusColor = Colors.orange; // Default color
-        if (permit.statusIzin == 'diacc') {
+        if (permit.statusIzin == 'Disetujui') {
           statusColor = Colors.green;
-        } else if (permit.statusIzin == 'ditolak') {
+        } else if (permit.statusIzin == 'Ditolak') {
           statusColor = Colors.red;
         }
 
         return Column(
           children: [
             PermitCard(
-              name:
-                  'Anomalia', // Contoh nama pegawai, sesuaikan dengan data yang ada
               date: '$formattedStartDate - $formattedEndDate',
               permitType: permit.jenisIzin ?? '---',
               status: permit.statusIzin ?? '---',
+              keterangan: permit.keterangan ?? '---',
               statusColor: statusColor,
               screenWidth: screenWidth,
             ),
-            SizedBox(height: screenWidth * 0.04),
+            SizedBox(height: screenWidth * 0.01),
           ],
         );
       }).toList(),
@@ -128,15 +135,11 @@ class _HistoryPermitPageState extends State<HistoryPermitPage> {
       children: [
         Expanded(
           child: Container(
-            height: 40,
-            color: Colors.grey[300],
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Container(
-            height: 40,
-            color: Colors.grey[300],
+            height: 220,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(10.0), // Sudut membulat
+            ),
           ),
         ),
       ],
@@ -145,19 +148,19 @@ class _HistoryPermitPageState extends State<HistoryPermitPage> {
 }
 
 class PermitCard extends StatelessWidget {
-  final String name;
   final String date;
   final String permitType;
   final String status;
+  final String keterangan;
   final Color statusColor;
   final double screenWidth;
 
   const PermitCard({
     super.key,
-    required this.name,
     required this.date,
     required this.permitType,
     required this.status,
+    required this.keterangan,
     required this.statusColor,
     required this.screenWidth,
   });
@@ -165,61 +168,167 @@ class PermitCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(screenWidth * 0.04),
+      margin: EdgeInsets.symmetric(
+        horizontal: screenWidth * 0.04,
+        vertical: screenWidth * 0.02,
+      ),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: const [
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            statusColor.withOpacity(0.1),
+            Colors.white,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: statusColor.withOpacity(0.2),
+          width: 1.5,
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
+            color: Colors.black12.withOpacity(0.05),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: Offset(0, 5),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundImage:
-                const AssetImage('assets/avatar.png'), // Placeholder avatar
-            radius: screenWidth * 0.1, // Responsive radius for mobile
-          ),
-          SizedBox(width: screenWidth * 0.04),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.045,
-                    fontWeight: FontWeight.bold,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: EdgeInsets.all(screenWidth * 0.04),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with Date and Status
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today,
+                        color: statusColor,
+                        size: screenWidth * 0.05,
+                      ),
+                      SizedBox(width: screenWidth * 0.02),
+                      Text(
+                        date,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.035,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(height: screenWidth * 0.02),
-                Text('Tanggal: $date',
-                    style: TextStyle(fontSize: screenWidth * 0.04)),
-                Text('Jenis Izin: $permitType',
-                    style: TextStyle(fontSize: screenWidth * 0.04)),
-              ],
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.04, vertical: screenWidth * 0.02),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              status,
-              style: TextStyle(
-                color: statusColor,
-                fontWeight: FontWeight.bold,
-                fontSize: screenWidth * 0.04,
+                  AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.03,
+                      vertical: screenWidth * 0.02,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Text(
+                      status,
+                      style: TextStyle(
+                        color: statusColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: screenWidth * 0.035,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
+
+              // Divider
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: screenWidth * 0.03,
+                ),
+                child: Divider(
+                  color: statusColor.withOpacity(0.3),
+                  thickness: 1.5,
+                ),
+              ),
+
+              // Permit Type
+              Row(
+                children: [
+                  Icon(
+                    Icons.assignment_outlined,
+                    color: statusColor,
+                    size: screenWidth * 0.05,
+                  ),
+                  SizedBox(width: screenWidth * 0.02),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Jenis Izin',
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.03,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        permitType,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.04,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              // Vertical Spacing
+              SizedBox(height: screenWidth * 0.03),
+
+              // Description
+              Row(
+                children: [
+                  Icon(
+                    Icons.notes,
+                    color: statusColor,
+                    size: screenWidth * 0.05,
+                  ),
+                  SizedBox(width: screenWidth * 0.02),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Keterangan',
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.03,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: screenWidth * 0.01),
+                      Text(
+                        keterangan,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.04,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

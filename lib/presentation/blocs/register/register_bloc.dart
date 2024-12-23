@@ -44,16 +44,10 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
       // Emit success dengan data pegawai
       emit(RegisterSuccess(pegawai));
     } catch (e) {
-      // Penanganan error
       if (e is DioException) {
-        final errorResponse = e.response?.data;
-        final errorMessage = errorResponse != null
-            ? (errorResponse['message'] ?? 'Register gagal, coba lagi')
-            : 'Register gagal, coba lagi';
-
-        emit(RegisterFailure(errorMessage));
+        emit(RegisterFailure(e.response?.data['message'] ?? 'Login failed'));
       } else {
-        emit(RegisterFailure("Nomor pegawai tidak terdaftar, register gagal"));
+        emit(RegisterFailure("Terjadi kesalahan, coba lagi nanti."));
       }
     }
   }

@@ -4,7 +4,7 @@ class PegawaiEntity extends Equatable {
   final int? id;
   final int? idLevel;
   final String? namaPegawai;
-  final int noPegawai;
+  final String noPegawai;
   final int? boss;
   final String? jabatan;
   final String alamat;
@@ -16,7 +16,7 @@ class PegawaiEntity extends Equatable {
     this.id,
     this.idLevel,
     this.namaPegawai,
-    required this.noPegawai,
+    required this.noPegawai, // Tetap required
     this.boss,
     this.jabatan,
     required this.alamat,

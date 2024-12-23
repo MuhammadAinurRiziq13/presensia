@@ -1,3 +1,5 @@
+import 'dart:io';
+
 abstract class ProfileEvent {}
 
 class FetchAllDataEvent extends ProfileEvent {}
@@ -10,3 +12,9 @@ class ChangePasswordEvent extends ProfileEvent {
 }
 
 class LogoutEvent extends ProfileEvent {}
+
+class UploadImageEvent extends ProfileEvent {
+  final File imageFile;
+
+  UploadImageEvent({required this.imageFile});
+}

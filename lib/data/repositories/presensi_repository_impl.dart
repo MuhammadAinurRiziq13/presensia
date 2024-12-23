@@ -12,10 +12,12 @@ class PresensiRepositoryImpl implements PresensiRepository {
   Future<AttendanceEntity> storePresensi({
     required int idPegawai,
     required File fotoAbsen,
+    required String lokasiAbsen,
   }) async {
     final model = await _apiDataSource.storePresensi(
       idPegawai: idPegawai,
       fotoAbsen: fotoAbsen,
+      lokasiAbsen: lokasiAbsen,
     );
     return AttendanceEntity.fromModel(model);
   }

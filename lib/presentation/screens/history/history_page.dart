@@ -53,13 +53,14 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Riwayat Presensi'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _fetchHistoryData,
-          ),
-        ],
+        title: const Text(
+          'Riwayat Presensi',
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SafeArea(
         child: RefreshIndicator(
@@ -87,7 +88,7 @@ class _HistoryPageState extends State<HistoryPage> {
                         highlightColor: Colors.grey[100]!,
                         child: Column(
                           children:
-                              List.generate(5, (index) => _buildLoadingRow()),
+                              List.generate(1, (index) => _buildLoadingRow()),
                         ),
                       );
                     } else if (state is HistorySuccess) {
@@ -175,35 +176,154 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Widget _buildCalendarFilter() {
-    return TableCalendar(
-      firstDay: DateTime.utc(2020, 1, 1),
-      lastDay: DateTime.utc(2030, 12, 31),
-      focusedDay: _focusedDate,
-      selectedDayPredicate: (day) => _startDate?.isSameDate(day) ?? false,
-      onDaySelected: (selectedDay, focusedDay) {
-        setState(() {
-          _focusedDate = focusedDay;
-          _startDate = selectedDay; // Simpan tanggal yang dipilih
-        });
-      },
-      calendarStyle: const CalendarStyle(
-        todayDecoration: BoxDecoration(
-          color: Colors.blue,
-          shape: BoxShape.circle,
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.blue.shade500,
+            Colors.blue.shade700,
+          ],
         ),
-        selectedDecoration: BoxDecoration(
-          color: Colors.orange,
-          shape: BoxShape.circle,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.shade900.withOpacity(0.4),
+            spreadRadius: 3,
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(25),
+        child: Material(
+          color: Colors.transparent,
+          child: TableCalendar(
+            firstDay: DateTime.utc(2020, 1, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDate,
+            selectedDayPredicate: (day) => _startDate?.isSameDate(day) ?? false,
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _focusedDate = focusedDay;
+                _startDate = selectedDay;
+              });
+            },
+            calendarStyle: CalendarStyle(
+              // Today styling with a glowing effect
+              todayDecoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.blue.shade700,
+                    Colors.blue.shade900,
+                  ],
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blue.shade700.withOpacity(0.6),
+                    spreadRadius: 2,
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              todayTextStyle: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+
+              // Selected day with a vibrant highlight
+              selectedDecoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withOpacity(0.8),
+                    Colors.white.withOpacity(0.5),
+                  ],
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.3),
+                    spreadRadius: 2,
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              selectedTextStyle: TextStyle(
+                color: Colors.blue.shade900,
+                fontWeight: FontWeight.bold,
+              ),
+
+              // Default day styling
+              defaultDecoration: BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              defaultTextStyle: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+              ),
+
+              // Weekend styling
+              weekendTextStyle: TextStyle(
+                color: Colors.white.withOpacity(0.6),
+              ),
+
+              // Outside days
+              outsideDaysVisible: false,
+            ),
+            headerStyle: HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: true,
+              titleTextStyle: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: Colors.white.withOpacity(0.9),
+                letterSpacing: 1.2,
+              ),
+              leftChevronIcon: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.chevron_left,
+                  color: Colors.white,
+                ),
+              ),
+              rightChevronIcon: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.chevron_right,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            startingDayOfWeek: StartingDayOfWeek.monday,
+
+            // Day name styling
+            daysOfWeekStyle: DaysOfWeekStyle(
+              weekdayStyle: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
+              weekendStyle: TextStyle(
+                color: Colors.white.withOpacity(0.5),
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
         ),
-        weekendTextStyle: TextStyle(color: Colors.red),
-        outsideDaysVisible: false,
       ),
-      headerStyle: const HeaderStyle(
-        formatButtonVisible: false,
-        titleCentered: true,
-        titleTextStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
-      startingDayOfWeek: StartingDayOfWeek.monday,
     );
   }
 
@@ -291,6 +411,7 @@ class _HistoryPageState extends State<HistoryPage> {
             : '---';
 
         String statusAbsen = attendance.statusAbsen ?? '---';
+        String lokasiAbsen = attendance.lokasiAbsen ?? '---';
 
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -314,12 +435,16 @@ class _HistoryPageState extends State<HistoryPage> {
                       ),
                       const SizedBox(height: 8.0),
                       Row(
-                        children: const [
-                          Icon(Icons.location_on, color: Colors.blue, size: 16),
-                          SizedBox(width: 4.0),
-                          Text(
-                            "Lowokwaru, Malang, Jawa Timur", // Example static location
-                            style: TextStyle(color: Colors.grey),
+                        children: [
+                          const Icon(Icons.location_on,
+                              color: Colors.blue, size: 16),
+                          const SizedBox(width: 4.0),
+                          Expanded(
+                            child: Text(
+                              lokasiAbsen ?? "Lokasi tidak tersedia",
+                              style: const TextStyle(color: Colors.grey),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),
@@ -339,15 +464,11 @@ class _HistoryPageState extends State<HistoryPage> {
       children: [
         Expanded(
           child: Container(
-            height: 40,
-            color: Colors.grey[300],
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Container(
-            height: 40,
-            color: Colors.grey[300],
+            height: 110,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(10.0), // Sudut membulat
+            ),
           ),
         ),
       ],
